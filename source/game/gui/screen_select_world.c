@@ -32,6 +32,8 @@
 #include <m-lib/m-string.h>
 #include <string.h>
 #include <time.h>
+#include <sys/stat.h>
+
 
 static struct stack* worlds = NULL;
 
@@ -51,6 +53,67 @@ struct world_option {
 	int64_t last_access;
 	int64_t byte_size;
 };
+
+#ifndef PATH_MAX
+#define PATH_MAX 260
+#endif
+
+#ifdef _WIN32
+// Windows: usa stat para saber si es directorio
+static int is_dir(const char* base_path, const char* entry_name) {
+    char full_path[PATH_MAX];
+    struct stat st;
+
+    snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry_name);
+
+    if (stat(full_path, &st) == 0 && (st.st_mode & S_IFDIR)) {
+        return 1;
+    }
+    return 0;
+}
+#else
+// POSIX: usa d_type si disponible, si no stat
+static int is_dir(const char* base_path, const char* entry_name) {
+    DIR* d = opendir(base_path);
+    if (!d) return 0;
+
+    struct dirent* entry;
+    int result = 0;
+
+    while ((entry = readdir(d))) {
+        if (strcmp(entry->d_name, entry_name) == 0) {
+#ifdef DT_DIR
+            if (entry->d_type == DT_DIR) {
+                result = 1;
+            }
+            else if (entry->d_type == DT_UNKNOWN) {
+                // fallback a stat si d_type no está definido
+                char full_path[PATH_MAX];
+                struct stat st;
+                snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry_name);
+                if (stat(full_path, &st) == 0 && S_ISDIR(st.st_mode)) {
+                    result = 1;
+                }
+            }
+#else
+            // Si no hay d_type usa stat directo
+            {
+                char full_path[PATH_MAX];
+                struct stat st;
+                snprintf(full_path, sizeof(full_path), "%s/%s", base_path, entry_name);
+                if (stat(full_path, &st) == 0 && S_ISDIR(st.st_mode)) {
+                    result = 1;
+                }
+            }
+#endif
+            break;
+        }
+    }
+
+    closedir(d);
+    return result;
+}
+#endif
 
 static void screen_sworld_reset(struct screen* s, int width, int height) {
 	input_pointer_enable(true);
@@ -83,7 +146,7 @@ static void screen_sworld_reset(struct screen* s, int width, int height) {
 	if(d) {
 		struct dirent* dir;
 		while((dir = readdir(d))) {
-			if(dir->d_type & DT_DIR && *dir->d_name != '.') {
+			if(is_dir(saves_path, dir->d_name) && *dir->d_name != '.') {
 				struct world_option opt;
 				string_init_printf(opt.path, "%s/%s", saves_path, dir->d_name);
 
