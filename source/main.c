@@ -28,6 +28,7 @@
 #include <fat.h>
 #endif
 
+#include "log/log.h"
 #include "chunk_mesher.h"
 #include "daytime.h"
 #include "game/game_state.h"
@@ -48,6 +49,9 @@
 #include "lodepng/lodepng.h"
 
 int main(void) {
+	log_set_level(LOG_DEBUG);
+	log_info("Starting Cavex...");
+	log_debug("Debug mode enabled!");
 	gstate.quit = false;
 	gstate.camera = (struct camera) {
 		.x = 0, .y = 0, .z = 0, .rx = 0, .ry = 0, .controller = {0, 0, 0}};
@@ -68,7 +72,6 @@ int main(void) {
 
 	config_create(&gstate.config_user, "config.json");
 
-	input_init();
 	blocks_init();
 	items_init();
 	recipe_init();
@@ -94,6 +97,7 @@ int main(void) {
 
 	ptime_t last_frame = time_get();
 	ptime_t last_tick = last_frame;
+	input_init();
 
 	while(!gstate.quit) {
 		ptime_t this_frame = time_get();
