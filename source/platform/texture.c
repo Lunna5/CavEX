@@ -38,6 +38,7 @@ struct tex_gfx texture_gui_furnace;
 struct tex_gfx texture_gui2;
 struct tex_gfx texture_controls;
 struct tex_gfx texture_pointer;
+struct tex_gfx texture_pointer_grab;
 struct tex_gfx texture_clouds;
 struct tex_gfx texture_sun;
 struct tex_gfx texture_moon;
@@ -98,6 +99,7 @@ void tex_init() {
 	tex_gfx_load_file(&texture_items, "items.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_controls, "controls.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_pointer, "pointer.png", TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_pointer_grab, "pointer_grab.png", TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_clouds, "environment/clouds.png", TEX_FMT_IA4,
 					  false);
 	tex_gfx_load_file(&texture_sun, "terrain/sun.png", TEX_FMT_RGB16, false);

@@ -278,7 +278,7 @@ static void screen_furnace_render2D(struct screen* s, int width, int height) {
 	}
 
 	if(pointer_available) {
-		gfx_bind_texture(&texture_pointer);
+		gfx_bind_texture(inventory_get_picked_item(inv, NULL) ? &texture_pointer_grab: &texture_pointer);
 		gutil_texquad_rt_any(pointer_x, pointer_y, glm_rad(pointer_angle), 0, 0,
 							 256, 256, 96, 96);
 	}
