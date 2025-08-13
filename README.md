@@ -34,15 +34,7 @@
 
 ## Build instructions
 
-You need to download these libraries yourself and place their source files to the following directories. They are required for any platform.
-
-| library | files | destination |
-| --- | --- | --- |
-| [LodePNG](https://github.com/lvandeve/lodepng) | `lodepng.h` and `lodepng.c` | `source/lodepng/` |
-| [cglm](https://github.com/recp/cglm) | `include/cglm/` | `source/cglm/` |
-| [cNBT](https://github.com/chmod222/cNBT) | `buffer.c`, `buffer.h`, `list.h`, `nbt_loading.c`, `nbt_parsing.c`, `nbt_treeops.c`, `nbt_util.c` and `nbt.h` | `source/cNBT/` |
-| [parson](https://github.com/kgabis/parson) | `parson.h` and `parson.c` | `source/parson/` |
-| [M*LIB](https://github.com/P-p-H-d/mlib) | any root `*.h` | compiler include path |
+This project is multiplatform, so here you have the specific guide for each platform
 
 ### Wii
 
@@ -52,11 +44,9 @@ For the Wii platform you need to install the [devkitPro](https://devkitpro.org/w
 dkp-pacman -S wii-dev ppc-zlib
 ```
 
-To build, simply run make in the root directory. You might need to load the cross compiler env first (required e.g. if you use [fish](https://fishshell.com/) instead of bash).
-
-```bash
-source /etc/profile.d/devkit-env.sh
-make
+To build it just run the following command:
+```sh
+catnip -T Wii -B build_wii
 ```
 
 There should then be a .dol file in the root directory that your Wii can run. To copy the game to your `apps/` folder, it needs to look like this:
@@ -87,8 +77,8 @@ Building requires the following additional libraries, which you can install with
 ```bash
 mkdir build_pc
 cd build_pc
-cmake ..
-make
+cmake .. -G Ninja
+ninja
 ```
 
 Please also copy the fragment and vertex shaders from `resources/` next to your `assets/` directory.
@@ -98,3 +88,12 @@ Please also copy the fragment and vertex shaders from `resources/` next to your 
 ```sh
 pacman -S mingw-w64-x86_64-zlib mingw-w64-x86_64-glfw mingw-w64-x86_64-glew mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-winpthreads mingw-w64-x86_64-pkgconf
 ```
+
+```sh
+cmake -B build_pc -G Ninja
+cd build_pc
+ninja
+```
+
+> [!WARNING]
+> Remember that you need to have in the cwd the assets folder and the config.json file!
