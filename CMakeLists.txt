@@ -3,17 +3,10 @@ cmake_minimum_required(VERSION 3.14)
 project(cavex C)
 
 add_compile_options(
-	-O3
-	-march=native
-	-g
 	-fmacro-prefix-map=${CMAKE_SOURCE_DIR}/=
 )
 
 find_package(ZLIB REQUIRED)
-find_package(Threads REQUIRED)
-find_package(glfw3 3.3 REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
 
 add_executable(cavex
 	source/block/aabb.c
@@ -151,13 +144,51 @@ add_executable(cavex
 	source/log/log.c
 )
 
-if (WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    list(APPEND EXTRA_LIBS Threads::Threads)
+target_include_directories(cavex PRIVATE ${CMAKE_SOURCE_DIR}/include)
+message(STATUS CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "NintendoWii")
+	add_compile_options(
+		-std=c99
+		-pedantic
+		-Wextra
+		-Wno-unused-parameter
+		-flto=auto
+		-O3
+		-Wall
+		-DNDEBUG
+		-D_DEFAULT_SOURCE
+		-D_XOPEN_SOURCE=600
+	)
+
+	list(APPEND DEFINITIONS PLATFORM_WII)
+	list(APPEND EXTRA_LIBS
+		wiiuse
+		fat
+		bte
+		ogc
+		m
+		z
+	)
+else()
+	add_compile_options(
+		-O3
+		-march=native
+		-g
+	)
+	find_package(Threads REQUIRED)
+	find_package(glfw3 3.3 REQUIRED)
+	find_package(OpenGL REQUIRED)
+	find_package(GLEW REQUIRED)
+	list(APPEND DEFINITIONS PLATFORM_PC LOG_USE_COLOR)
+	list(APPEND EXTRA_LIBS OpenGL::GL GLEW::GLEW glfw)
+
+	if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "GNU")
+		list(APPEND EXTRA_LIBS Threads::Threads)
+	endif()
 endif()
 
-target_include_directories(cavex PRIVATE ${CMAKE_SOURCE_DIR}/include)
-
-target_compile_definitions(cavex PRIVATE PLATFORM_PC LOG_USE_COLOR CGLM_ALL_UNALIGNED)
+target_compile_definitions(cavex PRIVATE ${DEFINITIONS} CGLM_ALL_UNALIGNED)
 
 set_target_properties(
 	cavex PROPERTIES
@@ -167,11 +198,8 @@ set_target_properties(
 set_property(TARGET cavex PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 
 target_link_libraries(cavex PRIVATE
-    ${CMAKE_THREAD_LIBS_INIT}
-    ${EXTRA_LIBS}
-    ZLIB::ZLIB
-    glfw
-    GLEW::GLEW
-    OpenGL::GL
-    m
+	${CMAKE_THREAD_LIBS_INIT}
+	${EXTRA_LIBS}
+	ZLIB::ZLIB
+	m
 )
