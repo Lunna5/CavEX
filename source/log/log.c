@@ -49,7 +49,6 @@ static const char *level_colors[] = {
 };
 #endif
 
-
 static void stdout_callback(log_Event *ev) {
   char buf[16];
   buf[strftime(buf, sizeof(buf), "%H:%M:%S", ev->time)] = '\0';
