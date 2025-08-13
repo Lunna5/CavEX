@@ -17,6 +17,24 @@
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64"
+        },
+		{
+            "name": "Wii PPC (Windows)",
+            "includePath": [
+                "${workspaceFolder}/**",
+				"C:/devkitPro/libogc/include",
+				"C:/devkitPro/devkitPPC/include"
+			],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "PLATFORM_WII"
+            ],
+            "compilerPath": "C:/devkitPro/devkitPPC/bin/powerpc-eabi-gcc.exe",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x86"
         }
     ],
     "version": 4
