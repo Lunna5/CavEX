@@ -21,6 +21,12 @@
 
 #ifdef PLATFORM_PC
 
+#ifdef _WIN32
+#ifndef CLOCK_MONOTONIC_RAW
+#define CLOCK_MONOTONIC_RAW CLOCK_MONOTONIC
+#endif
+#endif
+
 #include <time.h>
 
 void time_reset() { }
