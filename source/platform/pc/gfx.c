@@ -25,6 +25,7 @@
 #include <math.h>
 #include <string.h>
 
+#include "../../log/log.h"
 #include "../../game/game_state.h"
 #include "../../graphics/texture_atlas.h"
 #include "../../lodepng/lodepng.h"
@@ -126,9 +127,9 @@ void gfx_setup() {
 	if(glewInit())
 		printf("Could not load extended OpenGL functions!\n");
 
-	printf("Vendor: %s\n", glGetString(GL_VENDOR));
-	printf("Renderer: %s\n", glGetString(GL_RENDERER));
-	printf("Version: %s\n", glGetString(GL_VERSION));
+	log_info("Vendor: %s", glGetString(GL_VENDOR));
+	log_info("Renderer: %s", glGetString(GL_RENDERER));
+	log_info("Version: %s", glGetString(GL_VERSION));
 
 	string_t shader_file;
 	string_init(shader_file);
