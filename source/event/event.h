@@ -22,14 +22,23 @@
 #include <stdbool.h>
 
 #include <stb_ds.h>
+#include "../network/client_interface.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 typedef enum {
-	EVENT_RAW, // Generic event type for future expansion
+	EVENT_RAW,					// Generic event type for future expansion
 	EVENT_KEY_PRESS,
+	EVENT_KEY_RELEASE,			// Key release event
+	EVENT_CLIENTBOUND_PACKET,
+	EVENT_SERVERBOUND_PACKET,
+	// UI EVENTS
+	UI_EVENT_SLOT_CLICK,        // Left-click on a slot
+	UI_EVENT_SLOT_RIGHT_CLICK,  // Right-click on a slot
+	UI_EVENT_SLOT_HOVER,        // Mouse over slot
+	UI_EVENT_SCREEN_CLOSE,      // Inventory Close
 } EventType;
 
 typedef struct {
@@ -42,6 +51,7 @@ typedef struct {
 	size_t length;
 	union {
 		KeyPressData key_press;
+		client_rpc clientbound_packet;
 		void* raw;
 	} data;
 } EventContainer;
