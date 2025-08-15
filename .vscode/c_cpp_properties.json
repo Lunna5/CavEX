@@ -10,7 +10,7 @@
                 "UNICODE",
                 "_UNICODE",
                 "PLATFORM_PC",
-				"LOG_USE_COLOR"
+                "LOG_USE_COLOR"
             ],
             "windowsSdkVersion": "10.0.26100.0",
             "compilerPath": "C:/msys64/mingw64/bin/gcc.exe",
@@ -18,13 +18,13 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64"
         },
-		{
+        {
             "name": "Wii PPC (Windows)",
             "includePath": [
                 "${workspaceFolder}/**",
-				"C:/devkitPro/libogc/include",
-				"C:/devkitPro/devkitPPC/include"
-			],
+                "C:/devkitPro/libogc/include",
+                "C:/devkitPro/devkitPPC/include"
+            ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
