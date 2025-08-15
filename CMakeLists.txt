@@ -144,6 +144,8 @@ set(CAVEX_SOURCES
         source/event/event.c
         source/boot.c
         source/stb_ds.c
+        source/game/gui/screen_container_common.c
+        source/game/gui/screen_container_common.h
 )
 
 add_library(cavexlib STATIC ${CAVEX_SOURCES})
