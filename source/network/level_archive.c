@@ -317,7 +317,7 @@ static bool write_vector(nbt_node* node, nbt_type type, vec3 data,
 
 bool level_archive_write_player(struct level_archive* la, vec3 position,
 								vec2 rotation, vec3 velocity,
-								enum world_dim dimension) {
+								world_dim dimension) {
 	assert(la && la->data);
 
 	nbt_node* pos;
@@ -354,7 +354,7 @@ bool level_archive_write_player(struct level_archive* la, vec3 position,
 
 bool level_archive_read_player(struct level_archive* la, vec3 position,
 							   vec2 rotation, vec3 velocity,
-							   enum world_dim* dimension) {
+							   world_dim* dimension) {
 	assert(la && la->data);
 
 	nbt_node* pos;

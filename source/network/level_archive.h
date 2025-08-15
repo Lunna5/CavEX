@@ -112,14 +112,14 @@ bool level_archive_write(struct level_archive* la, struct level_archive_tag tag,
 						 void* data);
 bool level_archive_write_player(struct level_archive* la, vec3 position,
 								vec2 rotation, vec3 velocity,
-								enum world_dim dimension);
+								world_dim dimension);
 bool level_archive_write_inventory(struct level_archive* la,
 								   struct inventory* inventory);
 bool level_archive_read_inventory(struct level_archive* la,
 								  struct inventory* inventory);
 bool level_archive_read_player(struct level_archive* la, vec3 position,
 							   vec2 rotation, vec3 velocity,
-							   enum world_dim* dimension);
+							   world_dim* dimension);
 void level_archive_destroy(struct level_archive* la);
 
 #endif

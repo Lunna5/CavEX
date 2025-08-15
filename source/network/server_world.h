@@ -46,7 +46,7 @@ DICT_DEF2(dict_server_chunks, int64_t, M_BASIC_OPLIST, struct server_chunk,
 
 struct server_world {
 	dict_server_chunks_t chunks;
-	enum world_dim dimension;
+	world_dim dimension;
 	string_t level_name;
 	struct region_archive loaded_regions[MAX_REGIONS];
 	ilist_regions_t loaded_regions_lru;
@@ -54,7 +54,7 @@ struct server_world {
 };
 
 void server_world_create(struct server_world* w, string_t level_name,
-						 enum world_dim dimension);
+						 world_dim dimension);
 void server_world_destroy(struct server_world* w);
 
 bool server_world_get_block(struct server_world* w, w_coord_t x, w_coord_t y,

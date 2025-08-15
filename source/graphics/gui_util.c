@@ -176,7 +176,7 @@ static const uint8_t chat_colors[16][3] = {
 	{0xFF, 0xFF, 0xFF},
 };
 
-void gutil_text(int x, int y, char* str, int scale, bool shadow) {
+void gutil_text(int x, const int y, const char* str, const int scale, const bool shadow) {
 	gfx_bind_texture(&texture_font);
 
 	int skip = 0;

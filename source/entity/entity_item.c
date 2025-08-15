@@ -100,7 +100,7 @@ static bool entity_server_tick(struct entity* e, struct server_local* s) {
 			s->player.active_inventory->logic->on_collect(
 				s->player.active_inventory, &e->data.item.item);
 
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_PICKUP_ITEM,
 			.payload.pickup_item.entity_id = e->id,
 			.payload.pickup_item.collector_id = 0, // local player

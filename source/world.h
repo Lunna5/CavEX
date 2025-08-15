@@ -31,10 +31,10 @@
 
 #define WORLD_HEIGHT 128
 
-enum world_dim {
+typedef enum {
 	WORLD_DIM_NETHER = -1,
 	WORLD_DIM_OVERWORLD = 0,
-};
+} world_dim;
 
 #include "block/aabb.h"
 #include "chunk.h"
@@ -61,7 +61,7 @@ struct world {
 	ilist_chunks2_t gpu_busy_chunks;
 	ptime_t anim_timer;
 	struct stack lighting_updates;
-	enum world_dim dimension;
+	world_dim dimension;
 };
 
 void world_create(struct world* w);

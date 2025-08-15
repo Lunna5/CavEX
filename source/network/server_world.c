@@ -42,7 +42,7 @@ void server_world_chunk_destroy(struct server_chunk* sc) {
 }
 
 void server_world_create(struct server_world* w, string_t level_name,
-						 enum world_dim dimension) {
+						 world_dim dimension) {
 	assert(w && dimension >= -1 && dimension <= 0);
 
 	dict_server_chunks_init(w->chunks);
@@ -185,12 +185,12 @@ bool server_world_set_block(struct server_world* w, w_coord_t x, w_coord_t y,
 			w->dimension == WORLD_DIM_NETHER, server_world_light_get_block,
 			server_world_light_set_light, w);
 
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_SET_BLOCK,
-			.payload.set_block.x = x,
-			.payload.set_block.y = y,
-			.payload.set_block.z = z,
-			.payload.set_block.block = blk,
+			.payload.update_block.x = x,
+			.payload.update_block.y = y,
+			.payload.update_block.z = z,
+			.payload.update_block.block = blk,
 		});
 	}
 

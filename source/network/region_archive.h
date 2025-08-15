@@ -48,9 +48,9 @@ ILIST_DEF(ilist_regions, struct region_archive, M_POD_OPLIST)
 
 bool region_archive_create_new(struct region_archive* ra, string_t world_name,
 							   w_coord_t x, w_coord_t z,
-							   enum world_dim dimension);
+							   world_dim dimension);
 bool region_archive_create(struct region_archive* ra, string_t world_name,
-						   w_coord_t x, w_coord_t z, enum world_dim dimension);
+						   w_coord_t x, w_coord_t z, world_dim dimension);
 void region_archive_destroy(struct region_archive* ra);
 bool region_archive_contains(struct region_archive* ra, w_coord_t x,
 							 w_coord_t z, bool* chunk_exists);

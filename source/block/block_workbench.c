@@ -54,7 +54,7 @@ static void onRightClick(struct server_local* s, struct item_data* it,
 						 struct block_info* where, struct block_info* on,
 						 enum side on_side) {
 	if(s->player.active_inventory == &s->player.inventory) {
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_OPEN_WINDOW,
 			.payload.window_open.window = WINDOWC_CRAFTING,
 			.payload.window_open.type = WINDOW_TYPE_WORKBENCH,

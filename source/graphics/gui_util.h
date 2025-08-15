@@ -39,7 +39,7 @@ void gutil_texquad_rt_any(int x, int y, float angle, int tx, int ty, int sx,
 void gutil_bg(void);
 void gutil_reset_font(struct tex_gfx* tex);
 int gutil_font_width(char* str, int scale);
-void gutil_text(int x, int y, char* str, int scale, bool shadow);
+void gutil_text(int x, int y, const char* str, int scale, bool shadow);
 void gutil_draw_item(struct item_data* item, int x, int y, int layer);
 
 #endif

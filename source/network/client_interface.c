@@ -24,7 +24,7 @@
 #include "server_interface.h"
 
 #define RPC_INBOX_SIZE 16
-static struct client_rpc rpc_msg[RPC_INBOX_SIZE];
+static client_rpc rpc_msg[RPC_INBOX_SIZE];
 static struct thread_channel clin_inbox;
 static struct thread_channel clin_empty_msg;
 
@@ -77,7 +77,7 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 	free(lighting_torch);
 }
 
-void clin_process(struct client_rpc* call) {
+void clin_process(client_rpc* call) {
 	assert(call);
 
 	switch(call->type) {
@@ -136,11 +136,11 @@ void clin_process(struct client_rpc* call) {
 				screen_set(&screen_load_world);
 			break;
 		case CRPC_INVENTORY_SLOT: {
-			uint8_t window = call->payload.inventory_slot.window;
+			uint8_t window = call->payload.set_inventory_slot.window;
 			if(gstate.windows[window])
 				windowc_slot_change(gstate.windows[window],
-									call->payload.inventory_slot.slot,
-									call->payload.inventory_slot.item);
+									call->payload.set_inventory_slot.slot,
+									call->payload.set_inventory_slot.item);
 			break;
 		}
 		case CRPC_WINDOW_TRANSACTION: {
@@ -183,14 +183,14 @@ void clin_process(struct client_rpc* call) {
 			break;
 		}
 		case CRPC_TIME_SET:
-			gstate.world_time = call->payload.time_set;
+			gstate.world_time = call->payload.time_set.time;
 			gstate.world_time_start = time_get();
 			break;
 		case CRPC_SET_BLOCK:
-			if(call->payload.set_block.block.type == BLOCK_AIR) {
+			if(call->payload.update_block.block.type == BLOCK_AIR) {
 				struct block_data blk = world_get_block(
-					&gstate.world, call->payload.set_block.x,
-					call->payload.set_block.y, call->payload.set_block.z);
+					&gstate.world, call->payload.update_block.x,
+					call->payload.update_block.y, call->payload.update_block.z);
 				struct block_data neighbours[6];
 
 				for(int k = 0; k < SIDE_MAX; k++) {
@@ -198,24 +198,24 @@ void clin_process(struct client_rpc* call) {
 					blocks_side_offset((enum side)k, &ox, &oy, &oz);
 
 					neighbours[k] = world_get_block(
-						&gstate.world, call->payload.set_block.x + ox,
-						call->payload.set_block.y + oy,
-						call->payload.set_block.z + oz);
+						&gstate.world, call->payload.update_block.x + ox,
+						call->payload.update_block.y + oy,
+						call->payload.update_block.z + oz);
 				}
 
 				particle_generate_block(&(struct block_info) {
 					.block = &blk,
 					.neighbours = neighbours,
-					.x = call->payload.set_block.x,
-					.y = call->payload.set_block.y,
-					.z = call->payload.set_block.z,
+					.x = call->payload.update_block.x,
+					.y = call->payload.update_block.y,
+					.z = call->payload.update_block.z,
 				});
 			}
 
-			world_set_block(&gstate.world, call->payload.set_block.x,
-							call->payload.set_block.y,
-							call->payload.set_block.z,
-							call->payload.set_block.block, true);
+			world_set_block(&gstate.world, call->payload.update_block.x,
+							call->payload.update_block.y,
+							call->payload.update_block.z,
+							call->payload.update_block.block, true);
 
 			break;
 		case CRPC_SPAWN_ITEM: {
@@ -281,8 +281,8 @@ void clin_update() {
 	}
 }
 
-void clin_rpc_send(struct client_rpc* call) {
-	struct client_rpc* empty;
+void clin_rpc_send(client_rpc* call) {
+	client_rpc* empty;
 	tchannel_receive(&clin_empty_msg, (void**)&empty, true);
 	*empty = *call;
 	tchannel_send(&clin_inbox, empty, true);

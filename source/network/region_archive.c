@@ -89,7 +89,7 @@ static bool rebuild_occupied_list(struct region_archive* ra) {
 
 bool region_archive_create_new(struct region_archive* ra, string_t world_name,
 							   w_coord_t x, w_coord_t z,
-							   enum world_dim dimension) {
+							   world_dim dimension) {
 	assert(ra && world_name);
 
 	if(dimension == WORLD_DIM_OVERWORLD) {
@@ -117,7 +117,7 @@ bool region_archive_create_new(struct region_archive* ra, string_t world_name,
 }
 
 bool region_archive_create(struct region_archive* ra, string_t world_name,
-						   w_coord_t x, w_coord_t z, enum world_dim dimension) {
+						   w_coord_t x, w_coord_t z, world_dim dimension) {
 	assert(ra && world_name);
 
 	ra->offsets = malloc(sizeof(uint32_t) * REGION_SIZE * REGION_SIZE);

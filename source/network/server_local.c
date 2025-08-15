@@ -58,7 +58,7 @@ struct entity* server_local_spawn_item(vec3 pos, struct item_data* it,
 			e->vel, (2.0F * rand_gen_flt(&s->rand_src) + 0.5F) * 0.1F, e->vel);
 	}
 
-	clin_rpc_send(&(struct client_rpc) {
+	clin_rpc_send(&(client_rpc) {
 		.type = CRPC_SPAWN_ITEM,
 		.payload.spawn_item.entity_id = e->id,
 		.payload.spawn_item.item = e->data.item.item,
@@ -102,11 +102,11 @@ void server_local_send_inv_changes(set_inv_slot_t changes,
 	while(!set_inv_slot_end_p(it)) {
 		size_t slot = *set_inv_slot_ref(it);
 
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_INVENTORY_SLOT,
-			.payload.inventory_slot.window = window,
-			.payload.inventory_slot.slot = slot,
-			.payload.inventory_slot.item = (slot == SPECIAL_SLOT_PICKED_ITEM) ?
+			.payload.set_inventory_slot.window = window,
+			.payload.set_inventory_slot.slot = slot,
+			.payload.set_inventory_slot.item = (slot == SPECIAL_SLOT_PICKED_ITEM) ?
 				inv->picked_item :
 				inv->items[slot],
 		});
@@ -145,7 +145,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				s->player.active_inventory, call->payload.window_click.slot,
 				call->payload.window_click.right_click, changes);
 
-			clin_rpc_send(&(struct client_rpc) {
+			clin_rpc_send(&(client_rpc) {
 				.type = CRPC_WINDOW_TRANSACTION,
 				.payload.window_transaction.accepted = accept,
 				.payload.window_transaction.action_id
@@ -258,12 +258,12 @@ static void server_local_process(struct server_rpc* call, void* user) {
 						inventory_consume(&s->player.inventory,
 										  slot + INVENTORY_SLOT_HOTBAR);
 
-						clin_rpc_send(&(struct client_rpc) {
+						clin_rpc_send(&(client_rpc) {
 							.type = CRPC_INVENTORY_SLOT,
-							.payload.inventory_slot.window = WINDOWC_INVENTORY,
-							.payload.inventory_slot.slot
+							.payload.set_inventory_slot.window = WINDOWC_INVENTORY,
+							.payload.set_inventory_slot.slot
 							= slot + INVENTORY_SLOT_HOTBAR,
-							.payload.inventory_slot.item
+							.payload.set_inventory_slot.item
 							= s->player.inventory
 								  .items[slot + INVENTORY_SLOT_HOTBAR],
 						});
@@ -273,7 +273,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			break;
 		case SRPC_UNLOAD_WORLD:
 			// save chunks here, then destroy all
-			clin_rpc_send(&(struct client_rpc) {
+			clin_rpc_send(&(client_rpc) {
 				.type = CRPC_WORLD_RESET,
 				.payload.world_reset.dimension = s->player.dimension,
 				.payload.world_reset.local_entity = 0,
@@ -303,7 +303,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 			if(level_archive_create(&s->level, s->level_name)) {
 				vec3 pos;
 				vec2 rot;
-				enum world_dim dim;
+				world_dim dim;
 				if(level_archive_read_player(&s->level, pos, rot, NULL, &dim)) {
 					server_world_create(&s->world, s->level_name, dim);
 					s->player.x = pos[0];
@@ -319,7 +319,7 @@ static void server_local_process(struct server_rpc* call, void* user) {
 				dict_entity_reset(s->entities);
 				s->player.active_inventory = &s->player.inventory;
 
-				clin_rpc_send(&(struct client_rpc) {
+				clin_rpc_send(&(client_rpc) {
 					.type = CRPC_WORLD_RESET,
 					.payload.world_reset.dimension = dim,
 					.payload.world_reset.local_entity = 0,
@@ -351,14 +351,14 @@ static void server_local_update(struct server_local* s) {
 			dict_entity_next(it);
 
 			if(remove) {
-				clin_rpc_send(&(struct client_rpc) {
+				clin_rpc_send(&(client_rpc) {
 					.type = CRPC_ENTITY_DESTROY,
 					.payload.entity_destroy.entity_id = key,
 				});
 
 				dict_entity_erase(s->entities, key);
 			} else if(e->delay_destroy < 0) {
-				clin_rpc_send(&(struct client_rpc) {
+				clin_rpc_send(&(client_rpc) {
 					.type = CRPC_ENTITY_MOVE,
 					.payload.entity_move.entity_id = key,
 					.payload.entity_move.pos
@@ -381,7 +381,7 @@ static void server_local_update(struct server_local* s) {
 								   &cz)) {
 		// unload just one chunk
 		server_world_save_chunk(&s->world, true, cx, cz);
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_UNLOAD_CHUNK,
 			.payload.unload_chunk.x = cx,
 			.payload.unload_chunk.z = cz,
@@ -423,7 +423,7 @@ static void server_local_update(struct server_local* s) {
 		memcpy(lighting_sky, sc->lighting_sky, sz / 2);
 		memcpy(lighting_torch, sc->lighting_torch, sz / 2);
 
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_CHUNK,
 			.payload.chunk.x = c_nearest_x * CHUNK_SIZE,
 			.payload.chunk.y = 0,
@@ -437,26 +437,26 @@ static void server_local_update(struct server_local* s) {
 			.payload.chunk.lighting_torch = lighting_torch,
 		});
 	} else if(!s->player.finished_loading) {
-		struct client_rpc pos;
+		client_rpc pos;
 		pos.type = CRPC_PLAYER_POS;
 		if(level_archive_read_player(&s->level, pos.payload.player_pos.position,
 									 pos.payload.player_pos.rotation, NULL,
 									 NULL))
 			clin_rpc_send(&pos);
 
-		clin_rpc_send(&(struct client_rpc) {
+		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_TIME_SET,
-			.payload.time_set = s->world_time,
+			.payload.time_set.time = s->world_time,
 		});
 
 		if(level_archive_read_inventory(&s->level, &s->player.inventory)) {
 			for(size_t k = 0; k < INVENTORY_SIZE; k++) {
 				if(s->player.inventory.items[k].id > 0) {
-					clin_rpc_send(&(struct client_rpc) {
+					clin_rpc_send(&(client_rpc) {
 						.type = CRPC_INVENTORY_SLOT,
-						.payload.inventory_slot.window = WINDOWC_INVENTORY,
-						.payload.inventory_slot.slot = k,
-						.payload.inventory_slot.item
+						.payload.set_inventory_slot.window = WINDOWC_INVENTORY,
+						.payload.set_inventory_slot.slot = k,
+						.payload.set_inventory_slot.item
 						= s->player.inventory.items[k],
 					});
 				}
