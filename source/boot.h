@@ -16,8 +16,14 @@
 	You should have received a copy of the GNU General Public License
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "boot.h"
 
-int main(void) {
-	boot();
+#ifndef CAVEX_BOOT_H
+#define CAVEX_BOOT_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+int boot(void);
+#ifdef __cplusplus
 }
+#endif
+#endif // CAVEX_BOOT_H
