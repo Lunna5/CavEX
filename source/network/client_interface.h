@@ -20,11 +20,19 @@
 #ifndef CLIENT_INTERFACE_H
 #define CLIENT_INTERFACE_H
 
-#include "../item/items.h"
-#include "../item/window_container.h"
-#include "../world.h"
-
-#include "../cglm/cglm.h"
+#include "clientbound/clientbound_entity_destroy.h"
+#include "clientbound/clientbound_entity_move.h"
+#include "clientbound/clientbound_load_chunk.h"
+#include "clientbound/clientbound_pickup_item.h"
+#include "clientbound/clientbound_player_pos.h"
+#include "clientbound/clientbound_set_inventory_slot.h"
+#include "clientbound/clientbound_set_time.h"
+#include "clientbound/clientbound_spawn_item.h"
+#include "clientbound/clientbound_unload_chunk.h"
+#include "clientbound/clientbound_update_block.h"
+#include "clientbound/clientbound_window_open.h"
+#include "clientbound/clientbound_window_transaction.h"
+#include "clientbound/clientbound_world_reset.h"
 
 enum client_rpc_type {
 	CRPC_CHUNK,
@@ -42,69 +50,27 @@ enum client_rpc_type {
 	CRPC_OPEN_WINDOW,
 };
 
-struct client_rpc {
+typedef struct {
 	enum client_rpc_type type;
 	union {
-		struct {
-			w_coord_t x, y, z;
-			w_coord_t sx, sy, sz;
-			uint8_t* ids;
-			uint8_t* metadata;
-			uint8_t* lighting_sky;
-			uint8_t* lighting_torch;
-		} chunk;
-		struct {
-			w_coord_t x, z;
-		} unload_chunk;
-		struct {
-			uint8_t window;
-			uint8_t slot;
-			struct item_data item;
-		} inventory_slot;
-		struct {
-			vec3 position;
-			vec2 rotation;
-		} player_pos;
-		uint64_t time_set;
-		struct {
-			enum world_dim dimension;
-			uint32_t local_entity;
-		} world_reset;
-		struct {
-			w_coord_t x, y, z;
-			struct block_data block;
-		} set_block;
-		struct {
-			uint8_t window;
-			uint16_t action_id;
-			bool accepted;
-		} window_transaction;
-		struct {
-			uint8_t window;
-			enum window_type type;
-			uint8_t slot_count;
-		} window_open;
-		struct {
-			uint32_t entity_id;
-			struct item_data item;
-			vec3 pos;
-		} spawn_item;
-		struct {
-			uint32_t entity_id;
-			uint32_t collector_id;
-		} pickup_item;
-		struct {
-			uint32_t entity_id;
-		} entity_destroy;
-		struct {
-			uint32_t entity_id;
-			vec3 pos;
-		} entity_move;
+		clientbound_load_chunk chunk;
+		clientbound_unload_chunk unload_chunk;
+		clientbound_set_inventory_slot set_inventory_slot;
+		clientbound_player_pos player_pos;
+		clientbound_set_time time_set;
+		clientbound_world_reset world_reset;
+		clientbound_update_block update_block;
+		clientbound_window_transaction window_transaction;
+		clientbound_window_open window_open;
+		clientbound_spawn_item spawn_item;
+		clientbound_pickup_item pickup_item;
+		clientbound_entity_destroy entity_destroy;
+		clientbound_entity_move entity_move;
 	} payload;
-};
+} client_rpc;
 
 void clin_init(void);
 void clin_update(void);
-void clin_rpc_send(struct client_rpc* call);
+void clin_rpc_send(client_rpc* call);
 
 #endif
