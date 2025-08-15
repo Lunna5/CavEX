@@ -1,0 +1,29 @@
+file(GLOB TEST_FILES "*.test.c")
+
+set(TEST_TARGETS "")
+
+foreach(TEST_FILE ${TEST_FILES})
+    get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+
+    add_executable(${TEST_NAME} ${TEST_FILE})
+
+    target_link_libraries(${TEST_NAME} PRIVATE cavexlib)
+
+    target_include_directories(${TEST_NAME} PRIVATE
+            ${CMAKE_SOURCE_DIR}/include
+            ${CMAKE_SOURCE_DIR}/source
+            ${CMAKE_CURRENT_SOURCE_DIR}/include  # If you have test-specific headers
+    )
+
+    add_test(
+            NAME ${TEST_NAME}
+            COMMAND ${TEST_NAME}
+    )
+
+    list(APPEND TEST_TARGETS ${TEST_NAME})
+endforeach()
+
+add_custom_target(run_tests
+        COMMAND ${CMAKE_CTEST_COMMAND} -V
+        DEPENDS ${TEST_TARGETS}
+)
