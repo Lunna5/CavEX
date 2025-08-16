@@ -1,6 +1,6 @@
 # CavEX
 
-*Cave Explorer* is a Wii homebrew game with the goal to recreate most of the core survival aspects up until Beta 1.7.3. Any features beyond *will not* be added.
+*Cave Explorer* is a Wii homebrew game with the goal to recreate most of the core survival aspects up until Beta 1.7.3. Any features beyond ~~*will not*~~ cold be added.
 
 ---
 
@@ -16,16 +16,16 @@
 ---
 
 **Planned features** *(in no particular order, not complete)*
-* main menu
-* generation of new chunks
-* biome colors
-* ~~player physics~~
-* ~~inventory management~~
-* ~~block placement~~ and destruction logic
-* ~~(random)~~ block updates
-* ~~item actions~~
-* real texture pack support
-* Beta 1.7.3 multiplayer support
+- [ ] main menu
+- [ ] biome colors
+- [ ] generation of new chunks
+- [x] player physics
+- [x] inventory management
+- [x] block placement and destruction logic
+- [x] (random) block updates
+- [x] item actions
+- [ ]  real texture pack support
+- [ ] Beta 1.7.3 multiplayer support
 
 ## Screenshot
 
@@ -46,7 +46,12 @@ dkp-pacman -S wii-dev ppc-zlib
 
 To build it just run the following command:
 ```sh
-catnip -T Wii -B build_wii
+catnip -T Wii -B build_wii/
+```
+
+If you want a debug build, you can run the following command instead:
+```sh
+catnip -T Wii -B build_wii/ build debug
 ```
 
 There should then be a .dol file in the root directory that your Wii can run. To copy the game to your `apps/` folder, it needs to look like this:
@@ -68,6 +73,8 @@ cavex
 └── meta.xml
 ```
 
+> [!NOTE]
+> If you are using dolphin, you need to enable the synchronization of the SD card with a folder, and there you need to put the files on the __root__
 ### GNU/Linux
 
 The game can also run on any PC with support for OpenGL 2.0 and played with keyboard and mouse.
@@ -83,7 +90,7 @@ ninja
 
 Please also copy the fragment and vertex shaders from `resources/` next to your `assets/` directory.
 
-# Windows (MINGW64)
+### Windows (MINGW64)
 
 ```sh
 pacman -S mingw-w64-x86_64-zlib mingw-w64-x86_64-glfw mingw-w64-x86_64-glew mingw-w64-x86_64-cmake mingw-w64-x86_64-gcc mingw-w64-x86_64-winpthreads mingw-w64-x86_64-pkgconf
