@@ -53,7 +53,7 @@ enum client_rpc_type {
 typedef struct {
 	enum client_rpc_type type;
 	union {
-		clientbound_load_chunk chunk;
+		clientbound_load_chunk load_chunk;
 		clientbound_unload_chunk unload_chunk;
 		clientbound_set_inventory_slot set_inventory_slot;
 		clientbound_player_pos player_pos;

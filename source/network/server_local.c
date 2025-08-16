@@ -425,16 +425,16 @@ static void server_local_update(struct server_local* s) {
 
 		clin_rpc_send(&(client_rpc) {
 			.type = CRPC_CHUNK,
-			.payload.chunk.x = c_nearest_x * CHUNK_SIZE,
-			.payload.chunk.y = 0,
-			.payload.chunk.z = c_nearest_z * CHUNK_SIZE,
-			.payload.chunk.sx = CHUNK_SIZE,
-			.payload.chunk.sy = WORLD_HEIGHT,
-			.payload.chunk.sz = CHUNK_SIZE,
-			.payload.chunk.ids = ids,
-			.payload.chunk.metadata = metadata,
-			.payload.chunk.lighting_sky = lighting_sky,
-			.payload.chunk.lighting_torch = lighting_torch,
+			.payload.load_chunk.x = c_nearest_x * CHUNK_SIZE,
+			.payload.load_chunk.y = 0,
+			.payload.load_chunk.z = c_nearest_z * CHUNK_SIZE,
+			.payload.load_chunk.sx = CHUNK_SIZE,
+			.payload.load_chunk.sy = WORLD_HEIGHT,
+			.payload.load_chunk.sz = CHUNK_SIZE,
+			.payload.load_chunk.ids = ids,
+			.payload.load_chunk.metadata = metadata,
+			.payload.load_chunk.lighting_sky = lighting_sky,
+			.payload.load_chunk.lighting_torch = lighting_torch,
 		});
 	} else if(!s->player.finished_loading) {
 		client_rpc pos;

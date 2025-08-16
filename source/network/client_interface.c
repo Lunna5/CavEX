@@ -18,12 +18,23 @@
 */
 
 #include "client_interface.h"
+#include "../event/event.h"
 #include "../game/game_state.h"
 #include "../particle.h"
 #include "../platform/thread.h"
 #include "server_interface.h"
 
 #define RPC_INBOX_SIZE 16
+
+#define CLIENTBOUND_HANDLER(container, PACKET_TYPE, FIELD_NAME)                \
+	if((container)->type != EVENT_CLIENTBOUND_PACKET)                          \
+		return;                                                                \
+	if((container)->data.clientbound_packet.type != (PACKET_TYPE))             \
+		return;                                                                \
+	__typeof__((container)                                                     \
+				   ->data.clientbound_packet.payload.FIELD_NAME)* packet       \
+		= &((container)->data.clientbound_packet.payload.FIELD_NAME)
+
 static client_rpc rpc_msg[RPC_INBOX_SIZE];
 static struct thread_channel clin_inbox;
 static struct thread_channel clin_empty_msg;
@@ -77,18 +88,22 @@ void clin_chunk(w_coord_t x, w_coord_t y, w_coord_t z, w_coord_t sx,
 	free(lighting_torch);
 }
 
+void clientbound_chunk_handler(const EventContainer* container) {
+	CLIENTBOUND_HANDLER(container, CRPC_CHUNK, load_chunk);
+	clin_chunk(packet->x, packet->y, packet->z, packet->sx, packet->sy,
+			   packet->sz, packet->ids, packet->metadata, packet->lighting_sky,
+			   packet->lighting_torch);
+}
+
 void clin_process(client_rpc* call) {
 	assert(call);
 
+	event_trigger(&(EventContainer) {.type = EVENT_CLIENTBOUND_PACKET,
+									 .length = sizeof(call),
+									 .data.clientbound_packet = *call});
+
 	switch(call->type) {
-		case CRPC_CHUNK:
-			clin_chunk(call->payload.chunk.x, call->payload.chunk.y,
-					   call->payload.chunk.z, call->payload.chunk.sx,
-					   call->payload.chunk.sy, call->payload.chunk.sz,
-					   call->payload.chunk.ids, call->payload.chunk.metadata,
-					   call->payload.chunk.lighting_sky,
-					   call->payload.chunk.lighting_torch);
-			break;
+		case CRPC_CHUNK: break;
 		case CRPC_UNLOAD_CHUNK:
 			world_unload_section(&gstate.world, call->payload.unload_chunk.x,
 								 call->payload.unload_chunk.z);
@@ -254,6 +269,7 @@ void clin_process(client_rpc* call) {
 void clin_init() {
 	tchannel_init(&clin_inbox, RPC_INBOX_SIZE);
 	tchannel_init(&clin_empty_msg, RPC_INBOX_SIZE);
+	event_register_handler(EVENT_CLIENTBOUND_PACKET, clientbound_chunk_handler);
 
 	for(int k = 0; k < RPC_INBOX_SIZE; k++)
 		tchannel_send(&clin_empty_msg, rpc_msg + k, true);
