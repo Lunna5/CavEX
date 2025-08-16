@@ -21,41 +21,20 @@ Copyright (c) 2025 Lunna5
 #include "../../graphics/gfx_util.h"
 #include "../../graphics/gui_util.h"
 #include "../../graphics/render_model.h"
+#include "../../log/log.h"
 #include "../../network/server_interface.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"
 #include "../game_state.h"
 #include "screen.h"
+
 #include <limits.h>
 
-void common_inventory_slots_renderer(struct container_slot* slots,
-									 size_t slots_index, size_t selected_slot,
-									 int width, int height) {
-	for(int k = 0; k < INVENTORY_SIZE_MAIN; k++) {
-		slots[(slots_index)++] = (struct container_slot) {
-			.x = (8 + (k % INVENTORY_SIZE_HOTBAR) * 18) * 2,
-			.y = (84 + (k / INVENTORY_SIZE_HOTBAR) * 18) * 2,
-			.slot = k + INVENTORY_SLOT_MAIN,
-		};
-	}
-
-	for(int k = 0; k < INVENTORY_SIZE_HOTBAR; k++) {
-		slots[(slots_index)++] = (struct container_slot) {
-			.x = (8 + k * 18) * 2,
-			.y = (84 + 3 * 18 + 4) * 2,
-			.slot = k + INVENTORY_SLOT_HOTBAR,
-		};
-	}
-}
-
-void crafting_table_slots_renderer(struct container_slot* slots,
-								   size_t slots_index, size_t selected_slot,
-								   int width, int height) {
-	common_inventory_slots_renderer(slots, slots_index, selected_slot, width,
-								height);
+static void setup_crafting_table_slots(struct container_slot* slots,
+									   size_t* slots_index) {
 	// Crafting table input slots (3x3)
 	for(int k = 0; k < CRAFTING_SIZE_INPUT; k++) {
-		slots[(slots_index)++] = (struct container_slot) {
+		slots[(*slots_index)++] = (struct container_slot) {
 			.x = (30 + (k % 3) * 18) * 2,
 			.y = (17 + (k / 3) * 18) * 2,
 			.slot = k + CRAFTING_SLOT_INPUT,
@@ -63,20 +42,42 @@ void crafting_table_slots_renderer(struct container_slot* slots,
 	}
 
 	// Crafting output slot
-	slots[(slots_index)++] = (struct container_slot) {
+	slots[(*slots_index)++] = (struct container_slot) {
 		.x = 124 * 2,
 		.y = 35 * 2,
 		.slot = CRAFTING_SLOT_OUTPUT,
 	};
 }
 
-void player_inventory_slots_renderer(struct container_slot* slots, size_t slots_index,
-							   size_t selected_slot, int width, int height) {
-	common_inventory_slots_renderer(slots, slots_index, selected_slot, width,
-									height);
+static void setup_furnace(struct container_slot* slots, size_t* slots_index) {
+	// Furnace input slot
+	slots[(*slots_index)++] = (struct container_slot) {
+		.x = 56 * 2,
+		.y = 17 * 2,
+		.slot = FURNACE_SLOT_INPUT,
+	};
+
+	// Furnace fuel slot
+	slots[(*slots_index)++] = (struct container_slot) {
+		.x = 56 * 2,
+		.y = 53 * 2,
+		.slot = FURNACE_SLOT_FUEL,
+	};
+
+	// Furnace output slot
+	slots[(*slots_index)++] = (struct container_slot) {
+		.x = 116 * 2,
+		.y = 35 * 2,
+		.slot = FURNACE_SLOT_OUTPUT,
+	};
+}
+
+static void
+setup_player_inventory_armor_and_crafting_slots(struct container_slot* slots,
+												size_t* slots_index) {
 	// Armor slots
 	for(int k = 0; k < INVENTORY_SIZE_ARMOR; k++) {
-		slots[(slots_index)++] = (struct container_slot) {
+		slots[(*slots_index)++] = (struct container_slot) {
 			.x = 8 * 2,
 			.y = (8 + k * 18) * 2,
 			.slot = k + INVENTORY_SLOT_ARMOR,
@@ -85,7 +86,7 @@ void player_inventory_slots_renderer(struct container_slot* slots, size_t slots_
 
 	// Personal crafting slots (2x2)
 	for(int k = 0; k < INVENTORY_SIZE_CRAFTING; k++) {
-		slots[(slots_index)++] = (struct container_slot) {
+		slots[(*slots_index)++] = (struct container_slot) {
 			.x = (88 + (k % 2) * 18) * 2,
 			.y = (26 + (k / 2) * 18) * 2,
 			.slot = k + INVENTORY_SLOT_CRAFTING,
@@ -93,7 +94,7 @@ void player_inventory_slots_renderer(struct container_slot* slots, size_t slots_
 	}
 
 	// Personal crafting output slot
-	slots[(slots_index)++] = (struct container_slot) {
+	slots[(*slots_index)++] = (struct container_slot) {
 		.x = 144 * 2,
 		.y = 36 * 2,
 		.slot = INVENTORY_SLOT_OUTPUT,
@@ -104,7 +105,7 @@ void player_inventory_slots_renderer(struct container_slot* slots, size_t slots_
 void container_setup_common_slots(struct container_slot* slots,
 								  size_t* slots_index, size_t* selected_slot,
 								  uint8_t container_type,
-								  bool is_crafting_table) {
+								  size_t main_inventory_offset) {
 	*slots_index = 0;
 
 	// Main inventory slots
@@ -112,9 +113,7 @@ void container_setup_common_slots(struct container_slot* slots,
 		slots[(*slots_index)++] = (struct container_slot) {
 			.x = (8 + (k % INVENTORY_SIZE_HOTBAR) * 18) * 2,
 			.y = (84 + (k / INVENTORY_SIZE_HOTBAR) * 18) * 2,
-			.slot = k
-				+ (is_crafting_table ? CRAFTING_SLOT_MAIN :
-									   INVENTORY_SLOT_MAIN),
+			.slot = k + main_inventory_offset, // Offset for main inventory
 		};
 	}
 
@@ -128,53 +127,27 @@ void container_setup_common_slots(struct container_slot* slots,
 		slots[(*slots_index)++] = (struct container_slot) {
 			.x = (8 + k * 18) * 2,
 			.y = (84 + 3 * 18 + 4) * 2,
-			.slot = k
-				+ (is_crafting_table ? CRAFTING_SLOT_HOTBAR :
-									   INVENTORY_SLOT_HOTBAR),
+			.slot = k + main_inventory_offset
+				+ INVENTORY_SIZE_MAIN, // Offset for hotbar
 		};
 	}
 
-	if(is_crafting_table) {
-		// Crafting table input slots (3x3)
-		for(int k = 0; k < CRAFTING_SIZE_INPUT; k++) {
-			slots[(*slots_index)++] = (struct container_slot) {
-				.x = (30 + (k % 3) * 18) * 2,
-				.y = (17 + (k / 3) * 18) * 2,
-				.slot = k + CRAFTING_SLOT_INPUT,
-			};
+	switch(container_type) {
+		case WINDOWC_CRAFTING: {
+			setup_crafting_table_slots(slots, slots_index);
+			break;
 		}
-
-		// Crafting output slot
-		slots[(*slots_index)++] = (struct container_slot) {
-			.x = 124 * 2,
-			.y = 35 * 2,
-			.slot = CRAFTING_SLOT_OUTPUT,
-		};
-	} else {
-		// Armor slots
-		for(int k = 0; k < INVENTORY_SIZE_ARMOR; k++) {
-			slots[(*slots_index)++] = (struct container_slot) {
-				.x = 8 * 2,
-				.y = (8 + k * 18) * 2,
-				.slot = k + INVENTORY_SLOT_ARMOR,
-			};
+		case WINDOWC_INVENTORY: {
+			setup_player_inventory_armor_and_crafting_slots(slots, slots_index);
+			break;
 		}
-
-		// Personal crafting slots (2x2)
-		for(int k = 0; k < INVENTORY_SIZE_CRAFTING; k++) {
-			slots[(*slots_index)++] = (struct container_slot) {
-				.x = (88 + (k % 2) * 18) * 2,
-				.y = (26 + (k / 2) * 18) * 2,
-				.slot = k + INVENTORY_SLOT_CRAFTING,
-			};
+		case WINDOW_TYPE_FURNACE: {
+			setup_furnace(slots, slots_index);
+			break;
 		}
-
-		// Personal crafting output slot
-		slots[(*slots_index)++] = (struct container_slot) {
-			.x = 144 * 2,
-			.y = 36 * 2,
-			.slot = INVENTORY_SLOT_OUTPUT,
-		};
+		default: {
+			log_error("Unknown container type: %d", container_type);
+		}
 	}
 }
 
@@ -377,7 +350,6 @@ void container_render_common(struct container_screen_data* data, int width,
 	}
 
 	struct container_slot* selection = &data->slots[data->selected_slot];
-
 	// Draw items in slots
 	for(size_t k = 0; k < data->slots_index; k++) {
 		struct item_data item;

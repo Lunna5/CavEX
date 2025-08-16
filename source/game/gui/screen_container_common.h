@@ -69,7 +69,7 @@ struct container_screen_data {
 void container_setup_common_slots(struct container_slot* slots,
 								  size_t* slots_index, size_t* selected_slot,
 								  uint8_t container_type,
-								  bool is_crafting_table);
+								  size_t main_inventory_offset);
 
 void container_handle_input(struct container_screen_data* data,
 							uint8_t container_type);

@@ -55,7 +55,7 @@ static void screen_inventory_reset(struct screen* s, int width, int height) {
 
     // Setup common slots for inventory
     container_setup_common_slots(inv_slots, &inv_data.slots_index,
-                                &inv_data.selected_slot, WINDOWC_INVENTORY, false);
+                                &inv_data.selected_slot, WINDOWC_INVENTORY, INVENTORY_SLOT_MAIN);
 }
 
 static void screen_inventory_update(struct screen* s, float dt) {

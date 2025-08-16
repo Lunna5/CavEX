@@ -61,7 +61,7 @@ static void screen_crafting_reset(struct screen* s, int width, int height) {
 
     // Setup common slots for crafting table
     container_setup_common_slots(craft_slots, &craft_data.slots_index,
-                                &craft_data.selected_slot, crafting_container, true);
+                                &craft_data.selected_slot, crafting_container, CRAFTING_SLOT_MAIN);
 }
 
 static void screen_crafting_update(struct screen* s, float dt) {

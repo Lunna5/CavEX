@@ -27,36 +27,49 @@
 
 #include "items.h"
 
-// player inventory
-#define INVENTORY_SIZE 45
+// Inventario normal
+#define INVENTORY_ROWS 3
+#define INVENTORY_COLUMNS 9
+#define INVENTORY_SIZE_MAIN 27
 #define INVENTORY_SIZE_HOTBAR 9
 #define INVENTORY_SIZE_ARMOR 4
-#define INVENTORY_SIZE_MAIN 27
 #define INVENTORY_SIZE_CRAFTING 4
+#define INVENTORY_SIZE                                                         \
+	(INVENTORY_SIZE_MAIN + INVENTORY_SIZE_HOTBAR + INVENTORY_SIZE_ARMOR        \
+	 + INVENTORY_SIZE_CRAFTING                                                 \
+	 + 1) // 27+9+4+4+1 = 45 (the extra slot is for the result of crafting)
 
+// Slots
 #define INVENTORY_SLOT_OUTPUT 0
-#define INVENTORY_SLOT_CRAFTING 1
-#define INVENTORY_SLOT_ARMOR 5
-#define INVENTORY_SLOT_MAIN 9
-#define INVENTORY_SLOT_HOTBAR 36
+#define INVENTORY_SLOT_CRAFTING 1 // slots 1-4
+#define INVENTORY_SLOT_ARMOR 5	  // slots 5-8 (4 slots)
+#define INVENTORY_SLOT_MAIN 9	  // slots 9-35 (27 slots)
+#define INVENTORY_SLOT_HOTBAR 36  // slots 36-44 (9 slots)
 
-// crafting
-#define CRAFTING_SIZE 46
+// Crafting
 #define CRAFTING_SIZE_INPUT 9
+#define CRAFTING_SIZE                                                          \
+	(CRAFTING_SIZE_INPUT + 1 + INVENTORY_SIZE_MAIN                             \
+	 + INVENTORY_SIZE_HOTBAR) // 9+1+27+9=46
 
+// Slots
 #define CRAFTING_SLOT_OUTPUT 0
-#define CRAFTING_SLOT_INPUT 1
-#define CRAFTING_SLOT_MAIN 10
-#define CRAFTING_SLOT_HOTBAR 37
+#define CRAFTING_SLOT_INPUT 1	// slots 1-9
+#define CRAFTING_SLOT_MAIN 10	// slots 10-36 (27 slots)
+#define CRAFTING_SLOT_HOTBAR 37 // slots 37-45 (9 slots)
 
-// furnace
-#define FURNACE_SIZE 39
+// Furnace
 #define FURNACE_SIZE_INPUT 2
+#define FURNACE_SIZE                                                           \
+	(FURNACE_SIZE_INPUT + 1 + INVENTORY_SIZE_MAIN                              \
+	 + INVENTORY_SIZE_HOTBAR) // 2+1+27+9=39
 
+// Slots
 #define FURNACE_SLOT_INPUT 0
+#define FURNACE_SLOT_FUEL 1
 #define FURNACE_SLOT_OUTPUT 2
-#define FURNACE_SLOT_MAIN 3
-#define FURNACE_SLOT_HOTBAR 30
+#define FURNACE_SLOT_MAIN 3	   // slots 3-29 (27 slots)
+#define FURNACE_SLOT_HOTBAR 30 // slots 30-38 (9 slots)
 
 // picked item slot
 #define SPECIAL_SLOT_PICKED_ITEM 255
