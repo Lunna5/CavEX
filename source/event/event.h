@@ -66,10 +66,10 @@ typedef struct {
 void event_system_init(void);
 void event_system_cleanup(void);
 
-bool register_event(EventType type, EventHandler handler);
-bool unregister_event(EventType type, EventHandler handler);
+bool event_register_handler(EventType type, EventHandler handler);
+bool event_unregister_handler(EventType type, EventHandler handler);
 
-void trigger_event(const EventContainer* e);
+void event_trigger(const EventContainer* e);
 
 #ifdef __cplusplus
 }

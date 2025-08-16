@@ -44,7 +44,7 @@ static EventListeners* get_or_create_listeners(const EventType type) {
 	return &g_event_listeners[arrlen(g_event_listeners)-1];
 }
 
-bool register_event(const EventType type, const EventHandler handler) {
+bool event_register_handler(const EventType type, const EventHandler handler) {
 	if (!handler) return false;
 
 	EventListeners* el = get_or_create_listeners(type);
@@ -52,7 +52,7 @@ bool register_event(const EventType type, const EventHandler handler) {
 	return true;
 }
 
-bool unregister_event(const EventType type, const EventHandler handler) {
+bool event_unregister_handler(const EventType type, const EventHandler handler) {
 	if (!handler) return false;
 	for (size_t i = 0; i < arrlen(g_event_listeners); i++) {
 		EventListeners* el = &g_event_listeners[i];
@@ -68,7 +68,7 @@ bool unregister_event(const EventType type, const EventHandler handler) {
 	return false;
 }
 
-void trigger_event(const EventContainer* e) {
+void event_trigger(const EventContainer* e) {
 	if (!e || !g_event_listeners) return;
 
 	for (size_t i = 0; i < arrlen(g_event_listeners); i++) {
