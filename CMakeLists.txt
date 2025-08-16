@@ -214,8 +214,31 @@ target_link_libraries(cavexlib PUBLIC
 add_executable(cavex source/main.c)
 target_link_libraries(cavex PRIVATE cavexlib)
 
+add_custom_command(
+        TARGET cavex PRE_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/saves
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/assets
+        ${CMAKE_CURRENT_BINARY_DIR}/assets
+        COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        ${CMAKE_CURRENT_SOURCE_DIR}/saves
+        ${CMAKE_CURRENT_BINARY_DIR}/saves
+)
+
 if (CMAKE_SYSTEM_NAME STREQUAL "NintendoWii")
     ogc_create_dol(${PROJECT_NAME})
+
+    add_custom_command(
+            TARGET cavex POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/apps/cavex
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/saves
+            COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.dol
+            ${CMAKE_CURRENT_BINARY_DIR}/apps/cavex/boot.dol
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_CURRENT_SOURCE_DIR}/assets
+            ${CMAKE_CURRENT_BINARY_DIR}/apps/cavex/assets
+            COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different ${CMAKE_CURRENT_SOURCE_DIR}/saves
+            ${CMAKE_CURRENT_BINARY_DIR}/apps/cavex/saves
+    )
 else ()
     enable_testing()
     add_subdirectory(test)
