@@ -17,6 +17,8 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "event/event.h"
+
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -72,6 +74,7 @@ int boot(void) {
 
 	config_create(&gstate.config_user, "config.json");
 
+	event_system_init();
 	blocks_init();
 	items_init();
 	recipe_init();
