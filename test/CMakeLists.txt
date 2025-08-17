@@ -1,4 +1,4 @@
-file(GLOB TEST_FILES "*.test.c")
+file(GLOB TEST_FILES "source/*.test.c")
 
 set(TEST_TARGETS "")
 
@@ -22,6 +22,13 @@ foreach(TEST_FILE ${TEST_FILES})
 
     list(APPEND TEST_TARGETS ${TEST_NAME})
 endforeach()
+
+add_custom_command(
+        TARGET ${TEST_TARGETS}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/resources
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources/
+)
 
 add_custom_target(run_tests
         COMMAND ${CMAKE_CTEST_COMMAND} -V

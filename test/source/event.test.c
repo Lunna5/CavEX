@@ -16,8 +16,8 @@
 	You should have received a copy of the GNU General Public License
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "../source/event/event.h"
-#include "../source/log/log.h"
+#include "../../source/event/event.h"
+#include "../../source/log/log.h"
 
 #include <assert.h>
 

@@ -146,6 +146,8 @@ set(CAVEX_SOURCES
         source/stb_ds.c
         source/game/gui/screen_container_common.c
         source/game/gui/screen_container_common.h
+
+        source/graphics/model/bedrock_geometry.c
 )
 
 add_library(cavexlib STATIC ${CAVEX_SOURCES})
