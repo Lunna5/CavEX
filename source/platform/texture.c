@@ -129,7 +129,7 @@ void tex_init() {
 	tex_gfx_load_file(&texture_armor_diamond2, "armor/diamond_2.png",
 					  TEX_FMT_RGBA16, false);
 
-	tex_gfx_load_file(&texture_mob_char, "mob/char.png", TEX_FMT_RGBA16, false);
+	tex_gfx_load_file(&texture_mob_char, "mob/player.png", TEX_FMT_RGBA16, false);
 
 	size_t fog_size = 128;
 	uint8_t* fog = malloc(fog_size * fog_size * 4);
