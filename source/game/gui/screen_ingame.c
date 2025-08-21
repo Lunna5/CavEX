@@ -145,8 +145,9 @@ void screen_ingame_render3D(struct screen* s, mat4 view) {
 		glm_translate(model, (vec3) {-3.0F, -2.0F, -2.0F});
 
 		// TODO: depth fix in inventory
+
 		render_model_box(model, (vec3) {2, 12, 2}, (vec3) {2, 0, 2},
-						 (vec3) {180.0F, 0, 0}, (ivec2) {44, 20},
+						 (vec3) {180.0F, 0, 0}, (ivec2) {40, 16},
 						 (ivec3) {4, 4, 12}, 0.0F, false,
 						 gfx_lookup_light(light));
 	}

@@ -57,6 +57,7 @@ extern struct tex_gfx texture_terrain;
 extern struct tex_gfx texture_items;
 extern struct tex_gfx texture_font;
 extern struct tex_gfx texture_anim;
+extern struct tex_gfx texture_test;
 extern struct tex_gfx texture_gui_inventory;
 extern struct tex_gfx texture_gui_crafting;
 extern struct tex_gfx texture_gui_furnace;

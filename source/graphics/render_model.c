@@ -21,139 +21,302 @@
 
 #include "render_model.h"
 
+#include "model/bedrock_geometry.h"
+
+#include "../util.h"
+#include "model/bedrock_uv_mapper.h"
+
+#include <string.h>
+
+typedef struct {
+	uint16_t top[4];
+	uint16_t bottom[4];
+	uint16_t front[4];
+	uint16_t back[4];
+	uint16_t right[4];
+	uint16_t left[4];
+} PartUVs;
+
+static bedrock_geometry_root* player_geometry = NULL;
+
+void init_bedrock_geometry() {
+	char* json_data = read_file_to_buffer("assets/model/player.geo.json", NULL);
+	assert(json_data != NULL);
+	player_geometry = bedrock_geometry_parse(json_data);
+	free(json_data);
+	assert(player_geometry != NULL);
+}
+
+static void adjust_from_and_to(vec3 from, vec3 to, float inflate, vec3 stretch,
+							   vec3 adjusted_from, vec3 adjusted_to) {
+	// Calculate half size
+	vec3 half_size;
+	half_size[0] = (to[0] - from[0]) / 2.0f;
+	half_size[1] = (to[1] - from[1]) / 2.0f;
+	half_size[2] = (to[2] - from[2]) / 2.0f;
+
+	// Calculate center
+	vec3 center;
+	center[0] = from[0] + half_size[0];
+	center[1] = from[1] + half_size[1];
+	center[2] = from[2] + half_size[2];
+
+	// Apply inflation and stretch
+	for(int i = 0; i < 3; i++) {
+		adjusted_from[i] = center[i] - (half_size[i] + inflate) * stretch[i];
+		adjusted_to[i] = center[i] + (half_size[i] + inflate) * stretch[i];
+	}
+}
+
+static void generate_cube_vertices(vec3 from, vec3 to, vec3 origin,
+                               float inflate, vec3 stretch,
+                               int16_t* vertices) {
+    // Adjust from and to considering inflation and stretching
+    vec3 adjusted_from, adjusted_to;
+    adjust_from_and_to(from, to, inflate, stretch, adjusted_from, adjusted_to);
+
+    // Compute vertices relative to origin
+    // Order: front, back, left, right, top, bottom
+
+    // Front face (North in JS code)
+    vertices[0] = adjusted_from[0] - origin[0];   // x
+    vertices[1] = adjusted_to[1] - origin[1];     // y
+    vertices[2] = adjusted_from[2] - origin[2];   // z
+    vertices[3] = adjusted_to[0] - origin[0];     // x
+    vertices[4] = adjusted_to[1] - origin[1];     // y
+    vertices[5] = adjusted_from[2] - origin[2];   // z
+    vertices[6] = adjusted_to[0] - origin[0];     // x
+    vertices[7] = adjusted_from[1] - origin[1];   // y
+    vertices[8] = adjusted_from[2] - origin[2];   // z
+    vertices[9] = adjusted_from[0] - origin[0];   // x
+    vertices[10] = adjusted_from[1] - origin[1];  // y
+    vertices[11] = adjusted_from[2] - origin[2];  // z
+
+    // Back face (South in JS code)
+    vertices[12] = adjusted_to[0] - origin[0];    // x
+    vertices[13] = adjusted_to[1] - origin[1];    // y
+    vertices[14] = adjusted_to[2] - origin[2];    // z
+    vertices[15] = adjusted_from[0] - origin[0];  // x
+    vertices[16] = adjusted_to[1] - origin[1];    // y
+    vertices[17] = adjusted_to[2] - origin[2];    // z
+    vertices[18] = adjusted_from[0] - origin[0];  // x
+    vertices[19] = adjusted_from[1] - origin[1];  // y
+    vertices[20] = adjusted_to[2] - origin[2];    // z
+    vertices[21] = adjusted_to[0] - origin[0];    // x
+    vertices[22] = adjusted_from[1] - origin[1];  // y
+    vertices[23] = adjusted_to[2] - origin[2];    // z
+
+    // Left face (West in JS code)
+    vertices[24] = adjusted_from[0] - origin[0];  // x
+    vertices[25] = adjusted_to[1] - origin[1];    // y
+    vertices[26] = adjusted_to[2] - origin[2];    // z
+    vertices[27] = adjusted_from[0] - origin[0];  // x
+    vertices[28] = adjusted_to[1] - origin[1];    // y
+    vertices[29] = adjusted_from[2] - origin[2];  // z
+    vertices[30] = adjusted_from[0] - origin[0];  // x
+    vertices[31] = adjusted_from[1] - origin[1];  // y
+    vertices[32] = adjusted_from[2] - origin[2];  // z
+    vertices[33] = adjusted_from[0] - origin[0];  // x
+    vertices[34] = adjusted_from[1] - origin[1];  // y
+    vertices[35] = adjusted_to[2] - origin[2];    // z
+
+    // Right face (East in JS code)
+    vertices[36] = adjusted_to[0] - origin[0];    // x
+    vertices[37] = adjusted_to[1] - origin[1];    // y
+    vertices[38] = adjusted_from[2] - origin[2];  // z
+    vertices[39] = adjusted_to[0] - origin[0];    // x
+    vertices[40] = adjusted_to[1] - origin[1];    // y
+    vertices[41] = adjusted_to[2] - origin[2];    // z
+    vertices[42] = adjusted_to[0] - origin[0];    // x
+    vertices[43] = adjusted_from[1] - origin[1];  // y
+    vertices[44] = adjusted_to[2] - origin[2];    // z
+    vertices[45] = adjusted_to[0] - origin[0];    // x
+    vertices[46] = adjusted_from[1] - origin[1];  // y
+    vertices[47] = adjusted_from[2] - origin[2];  // z
+
+    // Top face (Up in JS code)
+    vertices[48] = adjusted_from[0] - origin[0];  // x
+    vertices[49] = adjusted_to[1] - origin[1];    // y
+    vertices[50] = adjusted_from[2] - origin[2];  // z
+    vertices[51] = adjusted_from[0] - origin[0];  // x
+    vertices[52] = adjusted_to[1] - origin[1];    // y
+    vertices[53] = adjusted_to[2] - origin[2];    // z
+    vertices[54] = adjusted_to[0] - origin[0];    // x
+    vertices[55] = adjusted_to[1] - origin[1];    // y
+    vertices[56] = adjusted_to[2] - origin[2];    // z
+    vertices[57] = adjusted_to[0] - origin[0];    // x
+    vertices[58] = adjusted_to[1] - origin[1];    // y
+    vertices[59] = adjusted_from[2] - origin[2];  // z
+
+    // Bottom face (Down in JS code)
+    vertices[60] = adjusted_from[0] - origin[0];  // x
+    vertices[61] = adjusted_from[1] - origin[1];  // y
+    vertices[62] = adjusted_from[2] - origin[2];  // z
+    vertices[63] = adjusted_to[0] - origin[0];    // x
+    vertices[64] = adjusted_from[1] - origin[1];  // y
+    vertices[65] = adjusted_from[2] - origin[2];  // z
+    vertices[66] = adjusted_to[0] - origin[0];    // x
+    vertices[67] = adjusted_from[1] - origin[1];  // y
+    vertices[68] = adjusted_to[2] - origin[2];    // z
+    vertices[69] = adjusted_from[0] - origin[0];  // x
+    vertices[70] = adjusted_from[1] - origin[1];  // y
+    vertices[71] = adjusted_to[2] - origin[2];    // z
+}
+
+void create_cube_at_origin_with_view(const mat4 view) {
+	// Position at origin
+	vec3 position = {-4.0F, 24.0F, -4.0F};
+	// No pivot offset
+	vec3 pivot = {0.0F, 24.0F, 0.0F};
+	// No rotation
+	vec3 rotation = {0.0F, 0.0F, 0.0F};
+	// UV origin (can be 0,0 for default texture coordinates)
+	ivec2 uv_origin = {0, 0};
+	// Cube size: width=1, depth=1, height=1
+	ivec3 box = {10, 10, 10};
+	// No padding, no mirroring, full brightness
+	float padding = 0.0F;
+	bool mirror = false;
+	float brightness = 1.0F;
+
+	// Render the cube with the provided view matrix
+	render_model_box(view, position, pivot, rotation, uv_origin, box, padding,
+					 mirror, brightness);
+}
+
 void render_model_box(mat4 view, vec3 position, vec3 pivot, vec3 rotation,
-					  ivec2 origin, ivec3 box, float padding, bool mirror,
-					  float brightness) {
-	assert(view && position && pivot && rotation && origin && box
-		   && padding >= -GLM_FLT_EPSILON && brightness >= -GLM_FLT_EPSILON
-		   && brightness <= 1.0F + GLM_FLT_EPSILON);
+                     ivec2 origin, ivec3 box, float padding, bool mirror,
+                     float brightness) {
+    // Only check valid ranges for float parameters
+    assert(padding >= -GLM_FLT_EPSILON &&
+           brightness >= -GLM_FLT_EPSILON &&
+           brightness <= 1.0F + GLM_FLT_EPSILON);
 
-	int sw = 256 / 64;
-	int sh = 256 / 32;
+    // Create model matrix with transformations applied in correct order
+    mat4 model;
+    glm_translate_make(model, position);
 
-	mat4 model;
-	glm_translate_make(model, position);
-	glm_rotate_z(model, glm_rad(rotation[2]), model);
-	glm_rotate_y(model, glm_rad(rotation[1]), model);
-	glm_rotate_x(model, glm_rad(rotation[0]), model);
-	glm_translate(
-		model,
-		(vec3) {-pivot[0] - padding, -pivot[1] - padding, -pivot[2] - padding});
-	glm_scale(model,
-			  (vec3) {padding * 2.0F / box[0] + 1.0F,
-					  padding * 2.0F / box[2] + 1.0F,
-					  padding * 2.0F / box[1] + 1.0F});
+    // Apply rotations in Z-Y-X order (standard Euler angles)
+    glm_rotate_z(model, glm_rad(rotation[2]), model);
+    glm_rotate_y(model, glm_rad(rotation[1]), model);
+    glm_rotate_x(model, glm_rad(rotation[0]), model);
 
-	mat4 modelview;
-	glm_mat4_mul(view, model, modelview);
-	gfx_matrix_modelview(modelview);
+    // Apply pivot offset and padding
+    glm_translate(model, (vec3){
+        -pivot[0] - padding,
+        -pivot[1] - padding,
+        -pivot[2] - padding
+    });
 
-	uint8_t light = roundf(brightness * 0xFF);
+    // Scale according to box dimensions and padding
+    // Note: The order of dimensions is intentionally [0,2,1] to match Minecraft's
+    // coordinate system where Y is height
+    glm_scale(model, (vec3){
+        padding * 2.0F / box[0] + 1.0F,
+        padding * 2.0F / box[2] + 1.0F,
+        padding * 2.0F / box[1] + 1.0F
+    });
 
-	// top, bottom, back, front, right, left
-	gfx_draw_quads(
-		24,
-		(int16_t[]) {
-			0,		box[2], 0,		box[0], box[2], 0,
-			box[0], box[2], box[1], 0,		box[2], box[1],
+    // Combine view and model matrices
+    mat4 modelview;
+    glm_mat4_mul(view, model, modelview);
+    gfx_matrix_modelview(modelview);
 
-			0,		0,		0,		0,		0,		box[1],
-			box[0], 0,		box[1], box[0], 0,		0,
+    // Convert brightness to 8-bit color component
+    uint8_t light = roundf(brightness * 0xFF);
 
-			0,		box[2], 0,		0,		0,		0,
-			box[0], 0,		0,		box[0], box[2], 0,
+    // Calculate UV coordinates for the cube faces
+    uint16_t uvCoords[48];
+    bedrock_calculate_cube_uv_map(
+        (uint16_t[]){box[0], box[2], box[1]},
+        (uint16_t[]){origin[0], origin[1]},
+        uvCoords,
+        mirror
+    );
 
-			0,		box[2], box[1], box[0], box[2], box[1],
-			box[0], 0,		box[1], 0,		0,		box[1],
+    // Generate cube vertices
+    vec3 from = {0, 0, 0};
+    vec3 to = {box[0], box[2], box[1]};
+    vec3 cube_origin = {0, 0, 0};
+    vec3 stretch = {1.0f, 1.0f, 1.0f};
+    float inflate = 0.0f;
+    int16_t vertices[72];
+    generate_cube_vertices(from, to, cube_origin, inflate, stretch, vertices);
 
-			box[0], 0,		0,		box[0], 0,		box[1],
-			box[0], box[2], box[1], box[0], box[2], 0,
+    // Create color array more efficiently
+    uint8_t colors[96]; // 24 vertices × 4 components (RGBA)
+    for (int i = 0; i < 24; i++) {
+        colors[i*4+0] = light; // R
+        colors[i*4+1] = light; // G
+        colors[i*4+2] = light; // B
+        colors[i*4+3] = 0xFF;  // A (always fully opaque)
+    }
 
-			0,		0,		0,		0,		box[2], 0,
-			0,		box[2], box[1], 0,		0,		box[1],
-		},
-		(uint8_t[]) {
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
+    // Draw the cube (top, bottom, back, front, right, left faces)
+    gfx_draw_quads_64(24, vertices, colors, uvCoords);
+}
 
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
+void render_bedrock_model(const mat4 mv, const bedrock_geometry_root root,
+                         struct tex_gfx tex_gfx, int geometry_index) {
+    assert(mv);
+    assert(root.geometries_count > 0);
+    assert(geometry_index >= 0 && geometry_index < root.geometries_count);
 
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
+    // Use the provided texture instead of hardcoded texture_mob_char
+    gfx_bind_texture(&tex_gfx);
 
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
+    const bedrock_geometry_entry* geometry = &root.geometries[geometry_index];
+    if (!geometry) return;
 
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
+    // Process bones in hierarchical order
+    for (int i = 0; i < geometry->bones_count; i++) {
+        const bedrock_geometry_bone* bone = &geometry->bones[i];
+        if (!bone) continue;
 
-			light, light, light, 0xFF, light, light, light, 0xFF,
-			light, light, light, 0xFF, light, light, light, 0xFF,
-		},
-		(uint16_t[]) {
-			(mirror ? (origin[0] + box[0]) : origin[0]) * sw,
-			(origin[1] - box[1]) * sh,
-			(mirror ? origin[0] : (origin[0] + box[0])) * sw,
-			(origin[1] - box[1]) * sh,
-			(mirror ? origin[0] : (origin[0] + box[0])) * sw,
-			origin[1] * sh,
-			(mirror ? (origin[0] + box[0]) : origin[0]) * sw,
-			origin[1] * sh,
+        // TODO: Apply bone hierarchy transformations here
+        // If bone->parent is defined, we should apply parent transforms first
 
-			(mirror ? (origin[0] + 2 * box[0]) : (origin[0] + box[0])) * sw,
-			origin[1] * sh,
-			(mirror ? (origin[0] + 2 * box[0]) : (origin[0] + box[0])) * sw,
-			(origin[1] - box[1]) * sh,
-			(mirror ? (origin[0] + box[0]) : (origin[0] + 2 * box[0])) * sw,
-			(origin[1] - box[1]) * sh,
-			(mirror ? (origin[0] + box[0]) : (origin[0] + 2 * box[0])) * sw,
-			origin[1] * sh,
+        // Store bone transformation matrix for child bones
+        mat4 bone_transform;
+        glm_mat4_identity(bone_transform);
 
-			(mirror ? (origin[0] + box[0] + box[1]) :
-					  (origin[0] + 2 * box[0] + box[1]))
-				* sw,
-			origin[1] * sh,
-			(mirror ? (origin[0] + box[0] + box[1]) :
-					  (origin[0] + 2 * box[0] + box[1]))
-				* sw,
-			(origin[1] + box[2]) * sh,
-			(mirror ? (origin[0] + 2 * box[0] + box[1]) :
-					  (origin[0] + box[0] + box[1]))
-				* sw,
-			(origin[1] + box[2]) * sh,
-			(mirror ? (origin[0] + 2 * box[0] + box[1]) :
-					  (origin[0] + box[0] + box[1]))
-				* sw,
-			origin[1] * sh,
+        // Render all cubes in this bone
+        for (int j = 0; j < bone->cubes_count; j++) {
+            const bedrock_geometry_cube* cube = &bone->cubes[j];
+            if (!cube) continue;
 
-			(mirror ? (origin[0] + box[0]) : origin[0]) * sw,
-			origin[1] * sh,
-			(mirror ? origin[0] : (origin[0] + box[0])) * sw,
-			origin[1] * sh,
-			(mirror ? origin[0] : (origin[0] + box[0])) * sw,
-			(origin[1] + box[2]) * sh,
-			(mirror ? (origin[0] + box[0]) : origin[0]) * sw,
-			(origin[1] + box[2]) * sh,
+            // Position from the cube definition
+            vec3 position = {cube->origin.x, cube->origin.y, cube->origin.z};
 
-			(origin[0] + box[0] + box[1]) * sw,
-			(origin[1] + box[2]) * sh,
-			(origin[0] + box[0]) * sw,
-			(origin[1] + box[2]) * sh,
-			(origin[0] + box[0]) * sw,
-			origin[1] * sh,
-			(origin[0] + box[0] + box[1]) * sw,
-			origin[1] * sh,
+            // Use bone pivot if available, otherwise no pivot
+            vec3 pivot = {0.0F, 0.0F, 0.0F};
+            // TODO: If bone has pivot data, use it: pivot = bone->pivot
 
-			(origin[0] - box[1]) * sw,
-			(origin[1] + box[2]) * sh,
-			(origin[0] - box[1]) * sw,
-			origin[1] * sh,
-			origin[0] * sw,
-			origin[1] * sh,
-			origin[0] * sw,
-			(origin[1] + box[2]) * sh,
-		});
+            // Apply rotation from the cube or bone
+            vec3 rotation = {0.0F, 0.0F, 0.0F};
+            // TODO: If cube has rotation, use it: rotation = cube->rotation
+
+            // UV origin from the cube
+            ivec2 uv_origin = {cube->uv.u, cube->uv.v};
+
+            // Cube size in the proper order for rendering
+            ivec3 box = {cube->size.x, cube->size.z, cube->size.y};
+
+            // Apply model parameters
+            float padding = 0.0F;
+            bool mirror = false; // Use mirror setting from the cube definition
+            float brightness = 1.0F;
+
+            // Create a combined matrix that includes bone transformations
+            mat4 combined_mv;
+            glm_mat4_copy(mv, combined_mv);
+            // TODO: Apply bone_transform to combined_mv if using bone hierarchy
+
+            // Render the cube with all transformations
+            render_model_box(combined_mv, position, pivot, rotation,
+                            uv_origin, box, padding, mirror, brightness);
+        }
+    }
 }
 
 void render_model_player(mat4 mv, float head_pitch, float head_yaw,
@@ -169,19 +332,84 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 	struct item* leggings_it = leggings ? item_get(leggings) : NULL;
 	struct item* boots_it = boots ? item_get(boots) : NULL;
 
-	gfx_bind_texture(&texture_mob_char);
+	gfx_bind_texture(&texture_test);
+	/*
+	create_cube_at_origin_with_view(mv);
+	*/
 
+	gfx_bind_texture(&texture_mob_char);
+	/*render_bedrock_model_complete(
+		mv, player_geometry, (vec3) {0.0F, -4.0F, 0.0F}, &texture_mob_char,
+		(vec3) {0.0F, 0.0F, 0.0F}, 1.0F, 1.0F);*/
+
+	render_bedrock_model(mv, *player_geometry, texture_mob_char, 0);
+
+	/*render_model_box(mv, (vec3) {-4.0F, -4.0F, 24}, // Z position adjusted
+					 (vec3) {-4.0F, -4.0F, 24},
+					 (vec3) {0.0F, 0.0F, 0.0F}, // Using clamped pitch
+					 (ivec2) {0, 0}, (ivec3) {8, 8, 8}, 0.0F, false, 1.0F);
+	render_model_box(mv, (vec3) {-4.0F, -24.0F, 12}, // Z position adjusted
+					 (vec3) {-4.0F, -2.0F, 12},
+					 (vec3) {0.0F, 0.0F, 0.0F}, // Using clamped pitch
+					 (ivec2) {16, 16}, (ivec3) {8, 4, 12}, 0.0F, false, 1.0F);*/
 	// head
-	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 0.0F, 4.0F},
-					 (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {8, 8},
-					 (ivec3) {8, 8, 8}, 0.0F, false, 1.0F);
+
+	/*float head_pitch_clamped
+		= glm_clamp(head_pitch, -60.0f, 60.0f); // Limit extreme angles
+	float head_forward_offset = 0.0f;
+
+	if(head_pitch < 0) {
+		// When looking down, move head forward proportionally to the angle
+		// This prevents intersection with the body
+		head_forward_offset
+			= -head_pitch * 0.04f; // Adjust this multiplier as needed
+	}
+
+	render_model_box(
+		mv,
+		(vec3) {0.0F, -4.0F, 0.0F + head_forward_offset}, // Z position
+	adjusted (vec3) {4.0F, 0.0F, 4.0F}, (vec3) {head_pitch_clamped,
+	head_yaw, 0.0F}, // Using clamped pitch (ivec2) {0, 0}, (ivec3) {8, 8,
+	8}, 0.0F, false, 1.0F);
+
+
+	// left foot
+	render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
+					 (vec3) {2.0F, 12.0F, 2.0F},
+					 (vec3) {foot_angle, 0.0F, 0.0F}, (ivec2) {0, 16},
+					 (ivec3) {4, 4, 12}, 0.0F, true, 1.0F);
+	// right foot
+	render_model_box(mv, (vec3) {-2.0F, -16.0F, 0.0F},
+					 (vec3) {2.0F, 12.0F, 2.0F},
+					 (vec3) {-foot_angle, 0.0F, 0.0F}, (ivec2) {0, 16},
+					 (ivec3) {4, 4, 12}, 0.0F, false, 1.0F);
+	// left arm
+	render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F}, (vec3)
+	{0.0F, 12.0F, 2.0F}, (vec3) {arm_angle, 0.0F, 4.0F}, (ivec2) {40, 16},
+					 (ivec3) {4, 4, 12}, 0.0F, true, 1.0F);
+
 	// head overlay
-	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 0.0F, 4.0F},
-					 (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {40, 8},
+	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F,
+	0.0F, 4.0F}, (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {32, 0},
 					 (ivec3) {8, 8, 8}, 0.5F, false, 1.0F);
 	// body
-	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F, 2.0F},
-					 (vec3) {0.0F, 0.0F, 0.0F}, (ivec2) {20, 20},
+	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F,
+	0.0F}, (vec3) {0.0F, 0.0F, 0.0F}, (ivec2) {16, 16}, (ivec3) {8, 4, 12},
+	0.0F, false, 1.0F);*/
+	gfx_cull_func(MODE_BACK);
+
+	// head
+	/*render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F,
+	0.0F, 4.0F}, (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {8, 8},
+	(ivec3) {8, 8, 8}, 0.0F, false, 1.0F); gfx_cull_func(MODE_BACK);*/
+	/*
+	// head overlay
+	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3) {4.0F,
+	0.0F, 4.0F}, (vec3) {head_pitch, head_yaw, 0.0F}, (ivec2) {40, 8},
+					 (ivec3) {8, 8, 8}, 0.5F, false, 1.0F);
+	// body
+	render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F}, (vec3)
+	{4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F}, (ivec2) {20, 20},
 					 (ivec3) {8, 4, 12}, 0.0F, false, 1.0F);
 	// left foot
 	render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
@@ -194,8 +422,8 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 					 (vec3) {-foot_angle, 0.0F, 0.0F}, (ivec2) {4, 20},
 					 (ivec3) {4, 4, 12}, 0.0F, false, 1.0F);
 	// left arm
-	render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F}, (vec3) {0.0F, 12.0F, 2.0F},
-					 (vec3) {arm_angle, 0.0F, 4.0F}, (ivec2) {44, 20},
+	render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F}, (vec3)
+	{0.0F, 12.0F, 2.0F}, (vec3) {arm_angle, 0.0F, 4.0F}, (ivec2) {44, 20},
 					 (ivec3) {4, 4, 12}, 0.0F, true, 1.0F);
 	// right arm
 	render_model_box(
@@ -261,9 +489,8 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 
 		// body
 		render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F},
-						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F},
-						 (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 1.0F, false,
-						 1.0F);
+						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F,
+	0.0F}, (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 1.0F, false, 1.0F);
 		// left arm
 		render_model_box(mv, (vec3) {4.0F, -4.0F, 0.0F},
 						 (vec3) {0.0F, 12.0F, 2.0F},
@@ -272,8 +499,8 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 		// right arm
 		render_model_box(
 			mv, (vec3) {-4.0F, -4.0F, 0.0F}, (vec3) {4.0F, 12.0F, 2.0F},
-			(vec3) {(held_item_it ? -22.5F : 0.0F) - arm_angle, 0.0F, -4.0F},
-			(ivec2) {44, 20}, (ivec3) {4, 4, 12}, 1.0F, false, 1.0F);
+			(vec3) {(held_item_it ? -22.5F : 0.0F) - arm_angle, 0.0F,
+	-4.0F}, (ivec2) {44, 20}, (ivec3) {4, 4, 12}, 1.0F, false, 1.0F);
 	}
 
 	if(leggings_it && leggings_it->armor.is_armor
@@ -281,9 +508,8 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 		gfx_bind_texture(armor_texture[leggings_it->armor.tier][1]);
 		// body
 		render_model_box(mv, (vec3) {0.0F, -4.0F, 0.0F},
-						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F, 0.0F},
-						 (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 0.5F, false,
-						 1.0F);
+						 (vec3) {4.0F, 12.0F, 2.0F}, (vec3) {0.0F, 0.0F,
+	0.0F}, (ivec2) {20, 20}, (ivec3) {8, 4, 12}, 0.5F, false, 1.0F);
 		// left leg
 		render_model_box(mv, (vec3) {2.0F, -16.0F, 0.0F},
 						 (vec3) {2.0F, 12.0F, 2.0F},
@@ -311,5 +537,5 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 						 (ivec3) {4, 4, 12}, 1.0F, false, 1.0F);
 	}
 
-	gfx_cull_func(MODE_BACK);
+	gfx_cull_func(MODE_BACK);*/
 }

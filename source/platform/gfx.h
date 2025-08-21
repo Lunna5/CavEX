@@ -78,8 +78,30 @@ void gfx_scissor(bool enable, uint32_t x, uint32_t y, uint32_t width,
 				 uint32_t height);
 void gfx_draw_lines(size_t vertex_count, const int16_t* vertices,
 					const uint8_t* colors);
+/**
+ * Draws quads using the given vertex data.
+ * The UV coordinates are not expected to be normalized, but should be
+ * thought of as 256x256 texture coordinates.
+ * @param vertex_count The number of vertices to draw, must be a multiple of 4.
+ * @param vertices The vertex data
+ * @param colors The color data, each vertex has 4 bytes (RGBA)
+ * @param texcoords The texture coordinates, each vertex has 2 bytes (U, V)
+ */
 void gfx_draw_quads(size_t vertex_count, const int16_t* vertices,
 					const uint8_t* colors, const uint16_t* texcoords);
+
+/**
+ * Draws quads using the given vertex data.
+ * The UV coordinates are not expected to be normalized, but should be
+ * thought of as 64x64 texture coordinates.
+ * @param vertex_count The number of vertices to draw, must be a multiple of 4.
+ * @param vertices The vertex data
+ * @param colors The color data, each vertex has 4 bytes (RGBA)
+ * @param texcoords The texture coordinates, each vertex has 2 bytes (U, V)
+ */
+void gfx_draw_quads_64(size_t vertex_count, const int16_t* vertices,
+					const uint8_t* colors, const uint16_t* texcoords);
+
 void gfx_draw_quads_flt(size_t vertex_count, const float* vertices,
 						const uint8_t* colors, const float* texcoords);
 

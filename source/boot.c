@@ -18,6 +18,7 @@
 */
 
 #include "event/event.h"
+#include "graphics/render_model.h"
 
 #include <assert.h>
 #include <math.h>
@@ -79,6 +80,7 @@ int boot(void) {
 	items_init();
 	recipe_init();
 	gfx_setup();
+	init_bedrock_geometry();
 
 	screen_set(&screen_select_world);
 

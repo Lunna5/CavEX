@@ -32,6 +32,7 @@ struct tex_gfx texture_terrain;
 struct tex_gfx texture_items;
 struct tex_gfx texture_font;
 struct tex_gfx texture_anim;
+struct tex_gfx texture_test;
 struct tex_gfx texture_gui_inventory;
 struct tex_gfx texture_gui_crafting;
 struct tex_gfx texture_gui_furnace;
@@ -89,6 +90,7 @@ void tex_init() {
 	gutil_reset_font(&texture_font);
 
 	tex_gfx_load_file(&texture_anim, "anim.png", TEX_FMT_RGBA32, false);
+	tex_gfx_load_file(&texture_test, "test.png", TEX_FMT_RGBA32, false);
 	tex_gfx_load_file(&texture_gui_inventory, "gui/inventory.png",
 					  TEX_FMT_RGBA16, false);
 	tex_gfx_load_file(&texture_gui_crafting, "gui/crafting.png", TEX_FMT_RGBA16,

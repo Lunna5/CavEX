@@ -30,7 +30,15 @@ bedrock_uv_face bedrock_calculate_uv_face(bedrock_uv_texture_region region,
 
 	return uv;
 }
+#ifdef PLATFORM_WII
+#define SW (256 / 64)
+#define SH (256 / 64)
+#else
+#define SW 1
+#define SH 1
+#endif
 
+// TODO: Maybe cache the UV coordinates for each model?
 void bedrock_calculate_cube_uv_map(uint16_t cube_size[3],
 								   uint16_t texture_region[2],
 								   uint16_t* uv_coords, bool mirror) {
@@ -104,24 +112,24 @@ void bedrock_calculate_cube_uv_map(uint16_t cube_size[3],
 
 		if(mirror) {
 			// Apply mirroring if needed
-			uv_coords[offset + 0] = uv.u2;
-			uv_coords[offset + 1] = uv.v1;
-			uv_coords[offset + 2] = uv.u1;
-			uv_coords[offset + 3] = uv.v1;
-			uv_coords[offset + 4] = uv.u1;
-			uv_coords[offset + 5] = uv.v2;
-			uv_coords[offset + 6] = uv.u2;
-			uv_coords[offset + 7] = uv.v2;
+			uv_coords[offset + 0] = uv.u2 * SW;
+			uv_coords[offset + 1] = uv.v1 * SH; // Top-left
+			uv_coords[offset + 2] = uv.u1 * SW;
+			uv_coords[offset + 3] = uv.v1 * SH; // Top-right
+			uv_coords[offset + 4] = uv.u1 * SW;
+			uv_coords[offset + 5] = uv.v2 * SH; // Bottom-right
+			uv_coords[offset + 6] = uv.u2 * SW;
+			uv_coords[offset + 7] = uv.v2 * SH; // Bottom-left
 		} else {
 			// Standard UV mapping
-			uv_coords[offset + 0] = uv.u1;
-			uv_coords[offset + 1] = uv.v1;
-			uv_coords[offset + 2] = uv.u2;
-			uv_coords[offset + 3] = uv.v1;
-			uv_coords[offset + 4] = uv.u2;
-			uv_coords[offset + 5] = uv.v2;
-			uv_coords[offset + 6] = uv.u1;
-			uv_coords[offset + 7] = uv.v2;
+			uv_coords[offset + 0] = uv.u1 * SW; // Top-left
+			uv_coords[offset + 1] = uv.v1 * SH;
+			uv_coords[offset + 2] = uv.u2 * SW; // Top-right
+			uv_coords[offset + 3] = uv.v1 * SH;
+			uv_coords[offset + 4] = uv.u2 * SW; // Bottom-right
+			uv_coords[offset + 5] = uv.v2 * SH;
+			uv_coords[offset + 6] = uv.u1 * SW; // Bottom-left
+			uv_coords[offset + 7] = uv.v2 * SH;
 		}
 	}
 
@@ -130,12 +138,12 @@ void bedrock_calculate_cube_uv_map(uint16_t cube_size[3],
 	bedrock_uv_face uv = bedrock_calculate_uv_face(regions[5], regions[5].width,
 												   regions[5].height);
 
-	uv_coords[offset + 0] = uv.u1;
-	uv_coords[offset + 1] = uv.v2; // Top-left
-	uv_coords[offset + 2] = uv.u2;
-	uv_coords[offset + 3] = uv.v2; // Top-right
-	uv_coords[offset + 4] = uv.u2;
-	uv_coords[offset + 5] = uv.v1; // Bottom-right
-	uv_coords[offset + 6] = uv.u1;
-	uv_coords[offset + 7] = uv.v1; // Bottom-left
+	uv_coords[offset + 0] = uv.u1 * SW; // Top-left
+	uv_coords[offset + 1] = uv.v2 * SH;
+	uv_coords[offset + 2] = uv.u2 * SW; // Top-right
+	uv_coords[offset + 3] = uv.v2 * SH;
+	uv_coords[offset + 4] = uv.u2 * SW; // Bottom-right
+	uv_coords[offset + 5] = uv.v1 * SH;
+	uv_coords[offset + 6] = uv.u1 * SW; // Bottom-left
+	uv_coords[offset + 7] = uv.v1 * SH;
 }
