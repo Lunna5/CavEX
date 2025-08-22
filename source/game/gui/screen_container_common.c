@@ -21,7 +21,7 @@ Copyright (c) 2025 Lunna5
 #include "../../graphics/gfx_util.h"
 #include "../../graphics/gui_util.h"
 #include "../../graphics/render_model.h"
-#include "../../log/log.h"
+#include <log.h>
 #include "../../network/server_interface.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"

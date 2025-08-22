@@ -24,7 +24,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "cglm/cglm.h"
+#include <cglm/cglm.h>
 
 #include "block/blocks_data.h"
 #include "stack.h"

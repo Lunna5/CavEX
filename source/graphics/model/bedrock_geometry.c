@@ -21,7 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "bedrock_geometry.h"
-#include "../../parson/parson.h"
+#include <parson.h>
 #include <stdlib.h>
 #include <string.h>
 

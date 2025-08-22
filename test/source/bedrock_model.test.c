@@ -38,13 +38,12 @@ char* read_file_to_buffer(const char* filename, size_t* size_out) {
 	fseek(file, 0, SEEK_SET); /* Rewind to start of file */
 
 	/* Allocate memory for the entire file content */
-	const auto buffer
-		= (char*)malloc(file_size + 1); /* +1 for null terminator */
+	char* buffer = (char*)malloc(file_size + 1); /* +1 for null terminator */
 
 	if(buffer == NULL) {
 		perror("Memory allocation failed");
 		fclose(file);
-		return nullptr;
+		return NULL;
 	}
 
 	/* Read file contents into buffer */
@@ -55,7 +54,7 @@ char* read_file_to_buffer(const char* filename, size_t* size_out) {
 		perror("Error reading file");
 		free(buffer);
 		fclose(file);
-		return nullptr;
+		return NULL;
 	}
 
 	/* Null-terminate the buffer (useful for text files) */

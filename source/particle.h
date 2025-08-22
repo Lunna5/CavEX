@@ -20,7 +20,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include "cglm/cglm.h"
+#include <cglm/cglm.h>
 #include "platform/time.h"
 #include "world.h"
 

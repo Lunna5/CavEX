@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "cglm/cglm.h"
+#include <cglm/cglm.h>
 #include <m-lib/m-i-list.h>
 
 #include "block/blocks.h"

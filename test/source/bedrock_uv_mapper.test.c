@@ -17,7 +17,7 @@
 	You should have received a copy of the GNU General Public License
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
-#include "log/log.h"
+#include <log.h>
 
 #include <assert.h>
 #include <graphics/model/bedrock_uv_mapper.h>

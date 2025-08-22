@@ -40,7 +40,7 @@ typedef struct {
 static bedrock_geometry_root* player_geometry = NULL;
 
 void init_bedrock_geometry() {
-	char* json_data = read_file_to_buffer("assets/model/player.geo.json", NULL);
+	char* json_data = read_file_to_buffer("assets/model/playe_alex.geo.json", NULL);
 	assert(json_data != NULL);
 	player_geometry = bedrock_geometry_parse(json_data);
 	free(json_data);
@@ -256,7 +256,7 @@ void render_model_box(mat4 view, vec3 position, vec3 pivot, vec3 rotation,
     gfx_draw_quads_64(24, vertices, colors, uvCoords);
 }
 
-void render_bedrock_model(const mat4 mv, const bedrock_geometry_root root,
+void render_bedrock_model(mat4 mv, const bedrock_geometry_root root,
                          struct tex_gfx tex_gfx, int geometry_index) {
     assert(mv);
     assert(root.geometries_count > 0);
@@ -309,8 +309,23 @@ void render_bedrock_model(const mat4 mv, const bedrock_geometry_root root,
 
             // Create a combined matrix that includes bone transformations
             mat4 combined_mv;
-            glm_mat4_copy(mv, combined_mv);
-            // TODO: Apply bone_transform to combined_mv if using bone hierarchy
+        	mat4 bone_local;
+        	glm_mat4_identity(bone_local);
+        	glm_translate(bone_local, (vec3){bone->pivot.x, bone->pivot.y, bone->pivot.z});
+        	glm_rotate_x(bone_local, glm_rad(bone->rotation.x), bone_local);
+        	glm_rotate_y(bone_local, glm_rad(bone->rotation.y), bone_local);
+        	glm_rotate_z(bone_local, glm_rad(bone->rotation.z), bone_local);
+        	glm_translate(bone_local, (vec3){-bone->pivot.x, -bone->pivot.y, -bone->pivot.z});
+
+        	// Combinar con padre (si existe)
+        	mat4 bone_final;
+        	if (bone->parent) {
+        		glm_mat4_mul(bone_transform, bone_local, bone_final);
+        	} else {
+        		glm_mat4_copy(bone_local, bone_final);
+        	}
+
+        	glm_mat4_mul(mv, bone_final, combined_mv);
 
             // Render the cube with all transformations
             render_model_box(combined_mv, position, pivot, rotation,
@@ -343,6 +358,18 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 		(vec3) {0.0F, 0.0F, 0.0F}, 1.0F, 1.0F);*/
 
 	render_bedrock_model(mv, *player_geometry, texture_mob_char, 0);
+
+	if(held_item_it) {
+		mat4 model;
+		glm_translate_make(model, (vec3) {0.0F, 0.0F, 0.0F});
+		glm_rotate_z(model, glm_rad(-4.0F), model);
+		glm_rotate_x(model, glm_rad(-22.5F - arm_angle), model);
+
+		mat4 mv_item;
+		glm_mat4_mul(mv, model, mv_item);
+		held_item_it->renderItem(held_item_it, held_item, mv_item, true,
+								 R_ITEM_ENV_THIRDPERSON);
+	}
 
 	/*render_model_box(mv, (vec3) {-4.0F, -4.0F, 24}, // Z position adjusted
 					 (vec3) {-4.0F, -4.0F, 24},

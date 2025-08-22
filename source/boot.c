@@ -31,7 +31,7 @@
 #include <fat.h>
 #endif
 
-#include "log/log.h"
+#include <log.h>
 #include "chunk_mesher.h"
 #include "daytime.h"
 #include "game/game_state.h"
@@ -47,9 +47,9 @@
 #include "platform/input.h"
 #include "world.h"
 
-#include "cNBT/nbt.h"
-#include "cglm/cglm.h"
-#include "lodepng/lodepng.h"
+#include <cNBT/nbt.h>
+#include <cglm/cglm.h>
+#include <lodepng.h>
 
 int boot(void) {
 	log_set_level(LOG_DEBUG);

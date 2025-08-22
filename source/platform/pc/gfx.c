@@ -25,10 +25,10 @@
 #include <math.h>
 #include <string.h>
 
-#include "../../log/log.h"
+#include <log.h>
 #include "../../game/game_state.h"
 #include "../../graphics/texture_atlas.h"
-#include "../../lodepng/lodepng.h"
+#include <lodepng.h>
 #include "../../util.h"
 #include "../gfx.h"
 #include "../input.h"
@@ -438,7 +438,7 @@ void gfx_draw_quads_64(size_t vertex_count, const int16_t* vertices,
 	assert(vertex_count < 64);
 
 	float tmp[vertex_count * 3];
-	for(size_t k = 0; k < vertex_count * 3; k++)
+	for(size_t k = 0; k < vertex_count * 2; k++)
 		tmp[k] = texcoords[k] / 64.0F;
 
 	glEnableVertexAttribArray(0);
