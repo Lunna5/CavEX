@@ -20,7 +20,7 @@
 #ifndef CAVEX_CLIENTBOUND_ENTITY_MOVE_H
 #define CAVEX_CLIENTBOUND_ENTITY_MOVE_H
 #include <stdint.h>
-#include "../../cglm/cglm.h"
+#include <cglm/cglm.h>
 
 typedef struct {
 	uint32_t entity_id;

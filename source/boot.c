@@ -18,6 +18,7 @@
 */
 
 #include "event/event.h"
+#include "graphics/render_model.h"
 
 #include <assert.h>
 #include <math.h>
@@ -30,7 +31,7 @@
 #include <fat.h>
 #endif
 
-#include "log/log.h"
+#include <log.h>
 #include "chunk_mesher.h"
 #include "daytime.h"
 #include "game/game_state.h"
@@ -46,9 +47,9 @@
 #include "platform/input.h"
 #include "world.h"
 
-#include "cNBT/nbt.h"
-#include "cglm/cglm.h"
-#include "lodepng/lodepng.h"
+#include <cNBT/nbt.h>
+#include <cglm/cglm.h>
+#include <lodepng.h>
 
 int boot(void) {
 	log_set_level(LOG_DEBUG);
@@ -79,6 +80,7 @@ int boot(void) {
 	items_init();
 	recipe_init();
 	gfx_setup();
+	init_bedrock_geometry();
 
 	screen_set(&screen_select_world);
 

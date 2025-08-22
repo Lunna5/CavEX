@@ -74,7 +74,7 @@
 #endif
 
 typedef int                     ivec2[2];
-typedef int                     ivec3[3];
+typedef int                     ivec3[3]; // 3D vector (x, z, y)
 typedef int                     ivec4[4];
 
 typedef float                   vec2[2];

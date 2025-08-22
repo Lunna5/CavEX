@@ -7,11 +7,11 @@
 * it, you can buy us a beer in return.
 * -----------------------------------------------------------------------------
 */
-#include "buffer.h"
+#include <cNBT/buffer.h>
 
 #include <assert.h>
-#include <stdlib.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef __GNUC__

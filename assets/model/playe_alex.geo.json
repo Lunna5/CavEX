@@ -13,7 +13,10 @@
 			"bones": [
 				{
 					"name": "root",
-					"pivot": [0, 0, 0]
+					"pivot": [0, 0, 0],
+					"cubes": [
+						{"origin": [-2, 0, -10], "size": [2, 2, 17], "uv": [5, 12]}
+					]
 				},
 				{
 					"name": "waist",

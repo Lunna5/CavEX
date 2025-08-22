@@ -32,4 +32,6 @@ void render_model_player(mat4 mv, float head_pitch, float head_yaw,
 						 struct item_data* chestplate,
 						 struct item_data* leggings, struct item_data* boots);
 
+void init_bedrock_geometry();
+
 #endif

@@ -103,3 +103,52 @@ inline void nibble_write(uint8_t* base, size_t idx, uint8_t data) {
 	base[idx / 2] = (base[idx / 2] & ~(0x0F << ((idx % 2) * 4)))
 		| (data << ((idx % 2) * 4));
 }
+
+char* read_file_to_buffer(const char* filename, size_t* size_out) {
+	/* Open the file in binary read mode */
+	FILE* file = fopen(filename, "rb");
+	if(file == NULL) {
+		perror("Error opening file");
+		return NULL;
+	}
+
+	/* Get file size */
+	fseek(file, 0, SEEK_END); /* Move position indicator to the end */
+	const size_t file_size
+		= ftell(file);		  /* Get current position (which is the size) */
+	fseek(file, 0, SEEK_SET); /* Rewind to start of file */
+
+	/* Allocate memory for the entire file content */
+	char* buffer
+		= (char*)malloc(file_size + 1); /* +1 for null terminator */
+
+	if(buffer == NULL) {
+		perror("Memory allocation failed");
+		fclose(file);
+		return NULL;
+	}
+
+	/* Read file contents into buffer */
+	size_t read_size = fread(buffer, 1, file_size, file);
+
+	/* Check if we read the expected number of bytes */
+	if(read_size != file_size) {
+		perror("Error reading file");
+		free(buffer);
+		fclose(file);
+		return NULL;
+	}
+
+	/* Null-terminate the buffer (useful for text files) */
+	buffer[file_size] = '\0';
+
+	/* Close the file */
+	fclose(file);
+
+	/* Output the size if requested */
+	if(size_out != NULL) {
+		*size_out = file_size;
+	}
+
+	return buffer;
+}

@@ -21,7 +21,7 @@ Copyright (c) 2025 Lunna5
 #include "../../graphics/gfx_util.h"
 #include "../../graphics/gui_util.h"
 #include "../../graphics/render_model.h"
-#include "../../log/log.h"
+#include <log.h>
 #include "../../network/server_interface.h"
 #include "../../platform/gfx.h"
 #include "../../platform/input.h"
@@ -301,7 +301,6 @@ void container_render_player_model(struct container_screen_data* data,
 	glm_scale(view, (vec3) {3.75F, -3.75F, 1.0F});
 	glm_rotate_x(view, angle_y * 0.66F * 0.5F, view);
 	glm_rotate_y(view, angle_x * 0.5F, view);
-	glm_translate(view, (vec3) {0.0F, 10.0F, 0.0F});
 
 	// Draw player model
 	gfx_write_buffers(true, true, true);

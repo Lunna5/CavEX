@@ -8,6 +8,12 @@ add_compile_options(
 
 find_package(ZLIB REQUIRED)
 
+add_subdirectory(libraries/parson)
+add_subdirectory(libraries/log)
+add_subdirectory(libraries/cNBT)
+add_subdirectory(libraries/cglm)
+add_subdirectory(libraries/lodepng)
+
 set(CAVEX_SOURCES
         source/block/aabb.c
         source/block/block_bed.c
@@ -77,12 +83,6 @@ set(CAVEX_SOURCES
         source/entity/entity_local_player.c
         source/entity/entity_item.c
 
-        source/cNBT/buffer.c
-        source/cNBT/nbt_loading.c
-        source/cNBT/nbt_parsing.c
-        source/cNBT/nbt_treeops.c
-        source/cNBT/nbt_util.c
-
         source/game/gui/screen_ingame.c
         source/game/gui/screen_load_world.c
         source/game/gui/screen_select_world.c
@@ -136,11 +136,6 @@ set(CAVEX_SOURCES
         source/config.c
         source/particle.c
 
-        source/lodepng/lodepng.c
-
-        source/parson/parson.c
-
-        source/log/log.c
         source/event/event.c
         source/boot.c
         source/stb_ds.c
@@ -148,6 +143,7 @@ set(CAVEX_SOURCES
         source/game/gui/screen_container_common.h
 
         source/graphics/model/bedrock_geometry.c
+        source/graphics/model/bedrock_uv_mapper.c
 )
 
 add_library(cavexlib STATIC ${CAVEX_SOURCES})
@@ -209,6 +205,11 @@ set_property(TARGET cavexlib PROPERTY INTERPROCEDURAL_OPTIMIZATION True)
 target_link_libraries(cavexlib PUBLIC
         ${CMAKE_THREAD_LIBS_INIT}
         ${EXTRA_LIBS}
+        parson
+        log
+        cNBT
+        cglm
+        lodepng
         ZLIB::ZLIB
         m
 )

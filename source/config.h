@@ -3,7 +3,7 @@
 
 #include <stdbool.h>
 
-#include "parson/parson.h"
+#include <parson.h>
 
 struct config {
 	JSON_Value* root;

@@ -20,7 +20,7 @@
 #ifndef CAVEX_CLIENTBOUND_SPAWN_ITEM_H
 #define CAVEX_CLIENTBOUND_SPAWN_ITEM_H
 #include <stdint.h>
-#include "../../cglm/cglm.h"
+#include <cglm/cglm.h>
 #include "../../item/items.h"
 
 typedef struct {

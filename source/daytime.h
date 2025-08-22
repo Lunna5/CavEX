@@ -20,7 +20,7 @@
 #ifndef DAYTIME_H
 #define DAYTIME_H
 
-#include "cglm/cglm.h"
+#include <cglm/cglm.h>
 
 #define DAY_TICK_MS 50
 #define DAY_LENGTH_TICKS 24000

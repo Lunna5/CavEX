@@ -17,7 +17,7 @@
 	along with CavEX.  If not, see <http://www.gnu.org/licenses/>.
 */
 #include "../../source/event/event.h"
-#include "../../source/log/log.h"
+#include <log.h>
 
 #include <assert.h>
 

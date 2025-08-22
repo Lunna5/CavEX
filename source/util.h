@@ -42,5 +42,6 @@ void hsv2rgb(float* h, float* s, float* v);
 
 uint8_t nibble_read(uint8_t* base, size_t idx);
 void nibble_write(uint8_t* base, size_t idx, uint8_t data);
+char* read_file_to_buffer(const char* filename, size_t* size_out);
 
 #endif
