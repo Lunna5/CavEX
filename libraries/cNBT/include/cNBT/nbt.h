@@ -20,7 +20,7 @@ extern "C" {
 #include <stdint.h>
 #include <stdio.h>  /* for FILE* */
 
-#include "buffer.h" /* for struct buffer */
+#include "buffer.h"
 #include "list.h"   /* For struct list_entry etc. */
 
 typedef enum {
